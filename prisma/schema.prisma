@@ -68,6 +68,10 @@ model Stock {
   industry      String?  // Lĩnh vực
   marketCap     Float?   // Vốn hóa thị trường
   listedShares  Float?   // Số cổ phiếu niêm yết
+  currentPrice  Float?   // Giá hiện tại
+  change        Float?   // Thay đổi
+  changePercent Float?   // % thay đổi
+  volume        Int?     // Khối lượng giao dịch
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
