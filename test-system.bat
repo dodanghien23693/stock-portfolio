@@ -26,10 +26,10 @@ echo 6. Testing Python service health...
 curl -s http://localhost:3000/api/python-service
 
 echo.
-echo ✅ System test completed!
-echo 📱 Frontend: http://localhost:3000
-echo 🔧 Python Service: http://localhost:8001
-echo 📊 Stocks page: http://localhost:3000/stocks
-echo ⚙️  Python Service page: http://localhost:3000/python-service
+echo  System test completed!
+echo  Frontend: http://localhost:3000
+echo  Python Service: http://localhost:8001
+echo  Stocks page: http://localhost:3000/stocks
+echo  Python Service page: http://localhost:3000/python-service
 
 pause

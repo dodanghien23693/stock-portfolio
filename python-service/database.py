@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 import logging
 from config import settings
+from cuid import cuid
 
 logger = logging.getLogger(__name__)
 
@@ -27,24 +28,29 @@ class DatabaseService:
             conn = self.get_connection()
             cursor = conn.cursor()
             
+            # Generate ID for new stock if needed
+            if 'id' not in stock_data:
+                stock_data['id'] = cuid()
+            
             # Update or insert current stock price
+            # Note: Prisma converts camelCase to snake_case in PostgreSQL
             query = """
-            INSERT INTO "Stock" (symbol, name, current_price, change_value, change_percent, 
-                               volume, high, low, open, close, trading_date, updated_at)
-            VALUES (%(symbol)s, %(name)s, %(price)s, %(change)s, %(change_percent)s, 
-                   %(volume)s, %(high)s, %(low)s, %(open)s, %(close)s, %(trading_date)s, NOW())
+            INSERT INTO "Stock" (id, symbol, name, "currentPrice", "changeValue", "changePercent", 
+                               volume, high, low, open, close, "tradingDate", "updatedAt", "createdAt")
+            VALUES (%(id)s, %(symbol)s, %(name)s, %(price)s, %(change)s, %(change_percent)s, 
+                   %(volume)s, %(high)s, %(low)s, %(open)s, %(close)s, %(trading_date)s, NOW(), NOW())
             ON CONFLICT (symbol) 
             DO UPDATE SET 
-                current_price = EXCLUDED.current_price,
-                change_value = EXCLUDED.change_value,
-                change_percent = EXCLUDED.change_percent,
+                "currentPrice" = EXCLUDED."currentPrice",
+                "changeValue" = EXCLUDED."changeValue",
+                "changePercent" = EXCLUDED."changePercent",
                 volume = EXCLUDED.volume,
                 high = EXCLUDED.high,
                 low = EXCLUDED.low,
                 open = EXCLUDED.open,
                 close = EXCLUDED.close,
-                trading_date = EXCLUDED.trading_date,
-                updated_at = NOW()
+                "tradingDate" = EXCLUDED."tradingDate",
+                "updatedAt" = NOW()
             """
             
             cursor.execute(query, stock_data)
@@ -65,16 +71,17 @@ class DatabaseService:
             cursor = conn.cursor()
             
             # Clear existing history for this symbol (or keep last 1 year)
+            # Fix: Cast date string to DATE for comparison
             delete_query = """
             DELETE FROM "StockHistory" 
-            WHERE symbol = %s AND date < (CURRENT_DATE - INTERVAL '1 year')
+            WHERE symbol = %s AND date::DATE < (CURRENT_DATE - INTERVAL '1 year')
             """
             cursor.execute(delete_query, (symbol,))
             
-            # Insert new history data
+            # Insert new history data - generate cuid for each record
             insert_query = """
-            INSERT INTO "StockHistory" (symbol, date, open, high, low, close, volume, value)
-            VALUES (%(symbol)s, %(date)s, %(open)s, %(high)s, %(low)s, %(close)s, %(volume)s, %(value)s)
+            INSERT INTO "StockHistory" (id, symbol, date, open, high, low, close, volume, value, "createdAt")
+            VALUES (%(id)s, %(symbol)s, %(date)s, %(open)s, %(high)s, %(low)s, %(close)s, %(volume)s, %(value)s, NOW())
             ON CONFLICT (symbol, date) 
             DO UPDATE SET 
                 open = EXCLUDED.open,
@@ -86,6 +93,7 @@ class DatabaseService:
             """
             
             for data in history_data:
+                data['id'] = cuid()  # Generate unique ID
                 data['symbol'] = symbol
                 cursor.execute(insert_query, data)
             
@@ -104,11 +112,12 @@ class DatabaseService:
             conn = self.get_connection()
             cursor = conn.cursor()
             
+            # Get symbols from stocks that are in any portfolio, using stockId to join with Stock table
             query = """
-            SELECT DISTINCT ps.symbol 
+            SELECT DISTINCT s.symbol 
             FROM "PortfolioStock" ps
-            INNER JOIN "Portfolio" p ON ps.portfolio_id = p.id
-            WHERE p.deleted_at IS NULL
+            INNER JOIN "Stock" s ON ps."stockId" = s.id
+            INNER JOIN "Portfolio" p ON ps."portfolioId" = p.id
             """
             
             cursor.execute(query)
@@ -128,20 +137,21 @@ class DatabaseService:
             conn = self.get_connection()
             cursor = conn.cursor()
             
+            # Use Prisma field names (camelCase converted to PostgreSQL)
             query = """
             UPDATE "Stock" 
             SET name = %(company_name)s,
                 exchange = %(exchange)s,
                 sector = %(sector)s,
                 industry = %(industry)s,
-                market_cap = %(market_cap)s,
-                listed_shares = %(listed_shares)s,
+                "marketCap" = %(market_cap)s,
+                "listedShares" = %(listed_shares)s,
                 eps = %(eps)s,
                 pe = %(pe)s,
                 pb = %(pb)s,
                 roe = %(roe)s,
                 roa = %(roa)s,
-                updated_at = NOW()
+                "updatedAt" = NOW()
             WHERE symbol = %(symbol)s
             """
             

@@ -5,7 +5,7 @@ load_dotenv()
 
 class Settings:
     # Database
-    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:admin@123@localhost:5432/stock-analysis")
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:admin%40123@localhost:5432/stock-analysis")
     
     # API Settings
     API_HOST = os.getenv("API_HOST", "0.0.0.0")

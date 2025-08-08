@@ -15,7 +15,9 @@ interface ServiceStatus {
 }
 
 export default function PythonServicePage() {
-  const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(null);
+  const [serviceStatus, setServiceStatus] = useState<ServiceStatus | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [syncSymbols, setSyncSymbols] = useState("VCB,VNM,HPG,VHM,TCB");
   const [syncPeriod, setSyncPeriod] = useState("1Y");
@@ -29,7 +31,7 @@ export default function PythonServicePage() {
     } catch (error) {
       setServiceStatus({
         status: "unreachable",
-        error: "Failed to check service status"
+        error: "Failed to check service status",
       });
     }
     setLoading(false);
@@ -38,17 +40,17 @@ export default function PythonServicePage() {
   const syncStocks = async () => {
     setLoading(true);
     try {
-      const symbols = syncSymbols.split(",").map(s => s.trim().toUpperCase());
+      const symbols = syncSymbols.split(",").map((s) => s.trim().toUpperCase());
       const response = await fetch("/api/python-service", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "sync",
           symbols,
-          period: syncPeriod
-        })
+          period: syncPeriod,
+        }),
       });
-      
+
       const data = await response.json();
       if (response.ok) {
         alert("Sync started successfully!");
@@ -68,10 +70,10 @@ export default function PythonServicePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "sync-tracked"
-        })
+          action: "sync-tracked",
+        }),
       });
-      
+
       const data = await response.json();
       if (response.ok) {
         alert("Tracked stocks sync started successfully!");
@@ -121,15 +123,26 @@ export default function PythonServicePage() {
         <CardContent>
           {serviceStatus ? (
             <div className="space-y-2">
-              <p><strong>URL:</strong> {serviceStatus.url}</p>
-              {serviceStatus.status === "healthy" && serviceStatus.pythonService && (
-                <div>
-                  <p><strong>Timestamp:</strong> {serviceStatus.pythonService.timestamp}</p>
-                  <p><strong>Message:</strong> {serviceStatus.pythonService.message}</p>
-                </div>
-              )}
+              <p>
+                <strong>URL:</strong> {serviceStatus.url}
+              </p>
+              {serviceStatus.status === "healthy" &&
+                serviceStatus.pythonService && (
+                  <div>
+                    <p>
+                      <strong>Timestamp:</strong>{" "}
+                      {serviceStatus.pythonService.timestamp}
+                    </p>
+                    <p>
+                      <strong>Message:</strong>{" "}
+                      {serviceStatus.pythonService.message}
+                    </p>
+                  </div>
+                )}
               {serviceStatus.error && (
-                <p className="text-red-500"><strong>Error:</strong> {serviceStatus.error}</p>
+                <p className="text-red-500">
+                  <strong>Error:</strong> {serviceStatus.error}
+                </p>
               )}
             </div>
           ) : (
@@ -147,17 +160,24 @@ export default function PythonServicePage() {
           <div>
             <h4 className="font-semibold mb-2">1. Start Python Service:</h4>
             <div className="bg-gray-100 p-3 rounded text-sm font-mono">
-              <p>Windows: <code>start-python-service.bat</code></p>
-              <p>Linux/Mac: <code>./start-python-service.sh</code></p>
+              <p>
+                Windows: <code>start-python-service.bat</code>
+              </p>
+              <p>
+                Linux/Mac: <code>./start-python-service.sh</code>
+              </p>
             </div>
           </div>
-          
+
           <div>
             <h4 className="font-semibold mb-2">2. Manual Setup:</h4>
             <div className="bg-gray-100 p-3 rounded text-sm font-mono space-y-1">
               <p>cd python-service</p>
               <p>python -m venv venv</p>
-              <p>venv\\Scripts\\activate (Windows) || source venv/bin/activate (Linux/Mac)</p>
+              <p>
+                venv\\Scripts\\activate (Windows) || source venv/bin/activate
+                (Linux/Mac)
+              </p>
               <p>pip install -r requirements.txt</p>
               <p>cp .env.example .env</p>
               <p>python main.py</p>
@@ -167,8 +187,13 @@ export default function PythonServicePage() {
           <div>
             <h4 className="font-semibold mb-2">3. Environment Variables:</h4>
             <div className="bg-gray-100 p-3 rounded text-sm">
-              <p>Update <code>python-service/.env</code> with your database connection:</p>
-              <p className="font-mono">DATABASE_URL=postgresql://user:password@localhost:5432/stock_portfolio</p>
+              <p>
+                Update <code>python-service/.env</code> with your database
+                connection:
+              </p>
+              <p className="font-mono">
+                DATABASE_URL=postgresql://user:password@localhost:5432/stock_portfolio
+              </p>
             </div>
           </div>
         </CardContent>
@@ -207,24 +232,24 @@ export default function PythonServicePage() {
               </select>
             </div>
           </div>
-          
+
           <div className="flex gap-4">
-            <Button 
-              onClick={syncStocks} 
+            <Button
+              onClick={syncStocks}
               disabled={loading || serviceStatus?.status !== "healthy"}
             >
               {loading ? "Syncing..." : "Sync Selected Stocks"}
             </Button>
-            
-            <Button 
-              onClick={syncTrackedStocks} 
+
+            <Button
+              onClick={syncTrackedStocks}
               disabled={loading || serviceStatus?.status !== "healthy"}
               variant="outline"
             >
               {loading ? "Syncing..." : "Sync Tracked Stocks"}
             </Button>
           </div>
-          
+
           {serviceStatus?.status !== "healthy" && (
             <p className="text-yellow-600 text-sm">
               ⚠️ Python service must be running and healthy to sync data
@@ -240,14 +265,37 @@ export default function PythonServicePage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm font-mono">
-            <p><strong>Health Check:</strong> GET http://localhost:8001/health</p>
-            <p><strong>Stock Price:</strong> GET http://localhost:8001/stocks/VCB/price</p>
-            <p><strong>Stock Info:</strong> GET http://localhost:8001/stocks/VCB/info</p>
-            <p><strong>Stock History:</strong> GET http://localhost:8001/stocks/VCB/history?period=1Y</p>
-            <p><strong>Market Indices:</strong> GET http://localhost:8001/market/indices</p>
-            <p><strong>Search Stocks:</strong> GET http://localhost:8001/stocks/search?q=VCB</p>
-            <p><strong>Sync Stocks:</strong> POST http://localhost:8001/sync/stocks</p>
-            <p><strong>Sync Tracked:</strong> POST http://localhost:8001/sync/tracked-stocks</p>
+            <p>
+              <strong>Health Check:</strong> GET http://localhost:8001/health
+            </p>
+            <p>
+              <strong>Stock Price:</strong> GET
+              http://localhost:8001/stocks/VCB/price
+            </p>
+            <p>
+              <strong>Stock Info:</strong> GET
+              http://localhost:8001/stocks/VCB/info
+            </p>
+            <p>
+              <strong>Stock History:</strong> GET
+              http://localhost:8001/stocks/VCB/history?period=1Y
+            </p>
+            <p>
+              <strong>Market Indices:</strong> GET
+              http://localhost:8001/market/indices
+            </p>
+            <p>
+              <strong>Search Stocks:</strong> GET
+              http://localhost:8001/stocks/search?q=VCB
+            </p>
+            <p>
+              <strong>Sync Stocks:</strong> POST
+              http://localhost:8001/sync/stocks
+            </p>
+            <p>
+              <strong>Sync Tracked:</strong> POST
+              http://localhost:8001/sync/tracked-stocks
+            </p>
           </div>
         </CardContent>
       </Card>
