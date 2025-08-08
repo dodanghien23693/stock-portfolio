@@ -8,6 +8,24 @@ import {
   TrendingUpIcon,
   TrendingDownIcon,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Portfolio {
   id: string;
@@ -179,31 +197,70 @@ export default function PortfolioPage() {
 
   if (!session) {
     return (
-      <div className="p-6">
-        <p>Vui lòng đăng nhập để xem portfolio</p>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="max-w-md mx-auto text-center">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-2">Yêu cầu đăng nhập</h2>
+            <p className="text-gray-600">Vui lòng đăng nhập để xem portfolio</p>
+          </CardContent>
+        </Card>
       </div>
-    );
+    )
   }
 
   if (loading) {
     return (
-      <div className="p-6">
-        <p>Đang tải...</p>
+      <div className="space-y-6">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Quản lý Portfolio</h1>
+          <p className="text-gray-600 mt-2">Đang tải...</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1 space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-3 w-24 mb-2" />
+                  <Skeleton className="h-3 w-16" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="lg:col-span-3">
+            <Card>
+              <CardContent className="p-6">
+                <Skeleton className="h-6 w-48 mb-4" />
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-16" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="p-6">
+    <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Quản lý Portfolio</h1>
-        <button
-          onClick={() => setShowCreateForm(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
-        >
-          <PlusIcon className="h-4 w-4" />
-          Tạo Portfolio
-        </button>
+        <div>
+          <h1 className="text-3xl font-bold">Quản lý Portfolio</h1>
+          <p className="text-gray-600 mt-2">
+            Quản lý và theo dõi danh mục đầu tư của bạn
+          </p>
+        </div>
+        <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+          <DialogTrigger asChild>
+            <Button className="flex items-center gap-2">
+              <PlusIcon className="h-4 w-4" />
+              Tạo Portfolio
+            </Button>
+          </DialogTrigger>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -216,52 +273,56 @@ export default function PortfolioPage() {
               const isSelected = selectedPortfolio?.id === portfolio.id;
 
               return (
-                <div
+                <Card
                   key={portfolio.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                  className={`cursor-pointer transition-all ${
                     isSelected
                       ? "border-blue-500 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      : "hover:border-gray-300"
                   }`}
                   onClick={() => setSelectedPortfolio(portfolio)}
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold">{portfolio.name}</h3>
-                      {portfolio.isDefault && (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                          Mặc định
-                        </span>
-                      )}
-                      <p className="text-sm text-gray-600 mt-1">
-                        {portfolio.stocks.length} mã CK
-                      </p>
-                      <div className="flex items-center gap-1 mt-2">
-                        {pnl >= 0 ? (
-                          <TrendingUpIcon className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <TrendingDownIcon className="h-4 w-4 text-red-600" />
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold">{portfolio.name}</h3>
+                        {portfolio.isDefault && (
+                          <Badge className="mt-1" variant="secondary">
+                            Mặc định
+                          </Badge>
                         )}
-                        <span
-                          className={`text-sm font-medium ${
-                            pnl >= 0 ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          {pnlPercent.toFixed(2)}%
-                        </span>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {portfolio.stocks.length} mã CK
+                        </p>
+                        <div className="flex items-center gap-1 mt-2">
+                          {pnl >= 0 ? (
+                            <TrendingUpIcon className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <TrendingDownIcon className="h-4 w-4 text-red-600" />
+                          )}
+                          <span
+                            className={`text-sm font-medium ${
+                              pnl >= 0 ? "text-green-600" : "text-red-600"
+                            }`}
+                          >
+                            {pnlPercent.toFixed(2)}%
+                          </span>
+                        </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deletePortfolio(portfolio.id);
+                        }}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deletePortfolio(portfolio.id);
-                      }}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
@@ -272,116 +333,114 @@ export default function PortfolioPage() {
           {selectedPortfolio ? (
             <>
               {/* Portfolio Summary */}
-              <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold">
-                      {selectedPortfolio.name}
-                    </h2>
-                    {selectedPortfolio.description && (
-                      <p className="text-gray-600 mt-1">
-                        {selectedPortfolio.description}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setShowAddStockForm(true)}
-                    className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700"
-                  >
-                    <PlusIcon className="h-4 w-4" />
-                    Thêm mã CK
-                  </button>
-                </div>
-
-                {(() => {
-                  const { pnl, pnlPercent, totalCost, currentValue } =
-                    calculatePortfolioPnL(selectedPortfolio);
-                  return (
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600">Tổng giá trị</p>
-                        <p className="text-2xl font-bold">
-                          {currentValue.toLocaleString("vi-VN")} ₫
-                        </p>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600">Vốn đầu tư</p>
-                        <p className="text-2xl font-bold">
-                          {totalCost.toLocaleString("vi-VN")} ₫
-                        </p>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600">P&L</p>
-                        <p
-                          className={`text-2xl font-bold ${
-                            pnl >= 0 ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          {pnl >= 0 ? "+" : ""}
-                          {pnl.toLocaleString("vi-VN")} ₫
-                        </p>
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600">% P&L</p>
-                        <p
-                          className={`text-2xl font-bold ${
-                            pnl >= 0 ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          {pnl >= 0 ? "+" : ""}
-                          {pnlPercent.toFixed(2)}%
-                        </p>
-                      </div>
+              <Card>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="text-2xl font-bold">
+                        {selectedPortfolio.name}
+                      </CardTitle>
+                      {selectedPortfolio.description && (
+                        <CardDescription className="mt-1">
+                          {selectedPortfolio.description}
+                        </CardDescription>
+                      )}
                     </div>
-                  );
-                })()}
-              </div>
+                    <Dialog open={showAddStockForm} onOpenChange={setShowAddStockForm}>
+                      <DialogTrigger asChild>
+                        <Button className="flex items-center gap-2">
+                          <PlusIcon className="h-4 w-4" />
+                          Thêm mã CK
+                        </Button>
+                      </DialogTrigger>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {(() => {
+                    const { pnl, pnlPercent, totalCost, currentValue } =
+                      calculatePortfolioPnL(selectedPortfolio);
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <Card>
+                          <CardContent className="p-4">
+                            <p className="text-sm text-gray-600">Tổng giá trị</p>
+                            <p className="text-2xl font-bold">
+                              {currentValue.toLocaleString("vi-VN")} ₫
+                            </p>
+                          </CardContent>
+                        </Card>
+                        <Card>
+                          <CardContent className="p-4">
+                            <p className="text-sm text-gray-600">Vốn đầu tư</p>
+                            <p className="text-2xl font-bold">
+                              {totalCost.toLocaleString("vi-VN")} ₫
+                            </p>
+                          </CardContent>
+                        </Card>
+                        <Card>
+                          <CardContent className="p-4">
+                            <p className="text-sm text-gray-600">P&L</p>
+                            <p
+                              className={`text-2xl font-bold ${
+                                pnl >= 0 ? "text-green-600" : "text-red-600"
+                              }`}
+                            >
+                              {pnl >= 0 ? "+" : ""}
+                              {pnl.toLocaleString("vi-VN")} ₫
+                            </p>
+                          </CardContent>
+                        </Card>
+                        <Card>
+                          <CardContent className="p-4">
+                            <p className="text-sm text-gray-600">% P&L</p>
+                            <p
+                              className={`text-2xl font-bold ${
+                                pnl >= 0 ? "text-green-600" : "text-red-600"
+                              }`}
+                            >
+                              {pnl >= 0 ? "+" : ""}
+                              {pnlPercent.toFixed(2)}%
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    );
+                  })()}
+                </CardContent>
+              </Card>
 
               {/* Stocks Table */}
-              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                <div className="px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold">Danh sách cổ phiếu</h3>
-                </div>
-
-                {selectedPortfolio.stocks.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">
-                    <p>Chưa có cổ phiếu nào trong portfolio</p>
-                    <button
-                      onClick={() => setShowAddStockForm(true)}
-                      className="mt-2 text-blue-600 hover:text-blue-800"
-                    >
-                      Thêm cổ phiếu đầu tiên
-                    </button>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Mã CK
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Số lượng
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Giá TB
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Giá hiện tại
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Giá trị
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            P&L
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Hành động
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>Danh sách cổ phiếu</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {selectedPortfolio.stocks.length === 0 ? (
+                    <div className="text-center py-6">
+                      <p className="text-gray-500 mb-4">Chưa có cổ phiếu nào trong portfolio</p>
+                      <Dialog open={showAddStockForm} onOpenChange={setShowAddStockForm}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline">
+                            Thêm cổ phiếu đầu tiên
+                          </Button>
+                        </DialogTrigger>
+                      </Dialog>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Mã CK</TableHead>
+                          <TableHead>Số lượng</TableHead>
+                          <TableHead>Giá TB</TableHead>
+                          <TableHead>Giá hiện tại</TableHead>
+                          <TableHead>Giá trị</TableHead>
+                          <TableHead>P&L</TableHead>
+                          <TableHead>Hành động</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {selectedPortfolio.stocks.map((stock) => {
                           const currentPrice =
                             stock.stock.currentPrice || stock.avgPrice || 0;
@@ -393,46 +452,45 @@ export default function PortfolioPage() {
                             totalCost > 0 ? (pnl / totalCost) * 100 : 0;
 
                           return (
-                            <tr key={stock.id}>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                            <TableRow key={stock.id}>
+                              <TableCell>
                                 <div>
-                                  <div className="text-sm font-medium text-gray-900">
+                                  <div className="font-medium text-gray-900">
                                     {stock.stock.symbol}
                                   </div>
                                   <div className="text-sm text-gray-500">
                                     {stock.stock.name}
                                   </div>
                                 </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              </TableCell>
+                              <TableCell>
                                 {stock.quantity.toLocaleString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              </TableCell>
+                              <TableCell>
                                 {(stock.avgPrice || 0).toLocaleString("vi-VN")}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">
-                                  {currentPrice.toLocaleString("vi-VN")}
-                                </div>
-                                {stock.stock.changePercent && (
-                                  <div
-                                    className={`text-xs ${
-                                      stock.stock.changePercent >= 0
-                                        ? "text-green-600"
-                                        : "text-red-600"
-                                    }`}
-                                  >
-                                    {stock.stock.changePercent >= 0 ? "+" : ""}
-                                    {stock.stock.changePercent.toFixed(2)}%
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <div className="text-sm text-gray-900">
+                                    {currentPrice.toLocaleString("vi-VN")}
                                   </div>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {stock.stock.changePercent && (
+                                    <Badge 
+                                      variant={stock.stock.changePercent >= 0 ? "secondary" : "destructive"}
+                                      className="text-xs"
+                                    >
+                                      {stock.stock.changePercent >= 0 ? "+" : ""}
+                                      {stock.stock.changePercent.toFixed(2)}%
+                                    </Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
                                 {totalValue.toLocaleString("vi-VN")}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
+                              </TableCell>
+                              <TableCell>
                                 <div
-                                  className={`text-sm font-medium ${
+                                  className={`font-medium ${
                                     pnl >= 0 ? "text-green-600" : "text-red-600"
                                   }`}
                                 >
@@ -447,65 +505,76 @@ export default function PortfolioPage() {
                                   {pnl >= 0 ? "+" : ""}
                                   {pnlPercent.toFixed(2)}%
                                 </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                <button
+                              </TableCell>
+                              <TableCell>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
                                   onClick={() =>
                                     removeStockFromPortfolio(stock.stock.id)
                                   }
                                   className="text-red-600 hover:text-red-800"
                                 >
                                   <TrashIcon className="h-4 w-4" />
-                                </button>
-                              </td>
-                            </tr>
+                                </Button>
+                              </TableCell>
+                            </TableRow>
                           );
                         })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
             </>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">Chưa có portfolio nào</p>
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-              >
-                Tạo Portfolio đầu tiên
-              </button>
-            </div>
+            <Card>
+              <CardContent className="text-center py-12">
+                <p className="text-gray-500 mb-4">Chưa có portfolio nào</p>
+                <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+                  <DialogTrigger asChild>
+                    <Button size="lg">
+                      Tạo Portfolio đầu tiên
+                    </Button>
+                  </DialogTrigger>
+                </Dialog>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
 
       {/* Create Portfolio Modal */}
-      {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Tạo Portfolio mới</h2>
-            <form onSubmit={createPortfolio}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Tạo Portfolio mới</DialogTitle>
+            <DialogDescription>
+              Tạo một portfolio mới để quản lý danh mục đầu tư của bạn.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={createPortfolio}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
                   Tên Portfolio
-                </label>
-                <input
-                  type="text"
+                </Label>
+                <Input
+                  id="name"
                   value={newPortfolio.name}
                   onChange={(e) =>
                     setNewPortfolio({ ...newPortfolio, name: e.target.value })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  className="col-span-3"
                   required
                 />
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
                   Mô tả
-                </label>
-                <textarea
+                </Label>
+                <Textarea
+                  id="description"
                   value={newPortfolio.description}
                   onChange={(e) =>
                     setNewPortfolio({
@@ -513,60 +582,58 @@ export default function PortfolioPage() {
                       description: e.target.value,
                     })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg"
+                  className="col-span-3"
                   rows={3}
                 />
               </div>
-              <div className="mb-6">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="isDefault" className="text-right">
+                  Mặc định
+                </Label>
+                <div className="col-span-3 flex items-center space-x-2">
+                  <Checkbox
+                    id="isDefault"
                     checked={newPortfolio.isDefault}
-                    onChange={(e) =>
+                    onCheckedChange={(checked) =>
                       setNewPortfolio({
                         ...newPortfolio,
-                        isDefault: e.target.checked,
+                        isDefault: checked === true,
                       })
                     }
-                    className="mr-2"
                   />
-                  <span className="text-sm text-gray-700">
+                  <Label
+                    htmlFor="isDefault"
+                    className="text-sm font-normal"
+                  >
                     Đặt làm portfolio mặc định
-                  </span>
-                </label>
+                  </Label>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Tạo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowCreateForm(false)}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
-                >
-                  Hủy
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+            <DialogFooter>
+              <Button type="submit">Tạo</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Stock Modal */}
-      {showAddStockForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Thêm cổ phiếu</h2>
-            <form onSubmit={addStockToPortfolio}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+      <Dialog open={showAddStockForm} onOpenChange={setShowAddStockForm}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Thêm cổ phiếu</DialogTitle>
+            <DialogDescription>
+              Thêm một mã cổ phiếu mới vào portfolio của bạn.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={addStockToPortfolio}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="symbol" className="text-right">
                   Mã cổ phiếu
-                </label>
-                <input
-                  type="text"
+                </Label>
+                <Input
+                  id="symbol"
                   value={newStock.symbol}
                   onChange={(e) =>
                     setNewStock({
@@ -574,16 +641,17 @@ export default function PortfolioPage() {
                       symbol: e.target.value.toUpperCase(),
                     })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg"
                   placeholder="VD: VNM, VCB, HPG..."
+                  className="col-span-3"
                   required
                 />
               </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="quantity" className="text-right">
                   Số lượng
-                </label>
-                <input
+                </Label>
+                <Input
+                  id="quantity"
                   type="number"
                   value={newStock.quantity}
                   onChange={(e) =>
@@ -592,16 +660,17 @@ export default function PortfolioPage() {
                       quantity: parseInt(e.target.value) || 0,
                     })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg"
                   min="1"
+                  className="col-span-3"
                   required
                 />
               </div>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="avgPrice" className="text-right">
                   Giá trung bình
-                </label>
-                <input
+                </Label>
+                <Input
+                  id="avgPrice"
                   type="number"
                   value={newStock.avgPrice}
                   onChange={(e) =>
@@ -610,31 +679,19 @@ export default function PortfolioPage() {
                       avgPrice: parseFloat(e.target.value) || 0,
                     })
                   }
-                  className="w-full p-3 border border-gray-300 rounded-lg"
                   min="0"
                   step="0.1"
+                  className="col-span-3"
                   required
                 />
               </div>
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
-                >
-                  Thêm
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddStockForm(false)}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
-                >
-                  Hủy
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+            <DialogFooter>
+              <Button type="submit" variant="default">Thêm</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -19,6 +19,7 @@ export async function POST(request: Request) {
       create: {
         symbol,
         name: priceData.companyName || symbol,
+        exchange: priceData.exchange || 'HOSE', // Default to HOSE if not provided
         currentPrice: priceData.price,
         change: priceData.change,
         changePercent: priceData.changePercent,

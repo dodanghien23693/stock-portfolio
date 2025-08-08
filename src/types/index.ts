@@ -121,7 +121,7 @@ export interface User {
 
 // Extend NextAuth Session
 declare module 'next-auth' {
-  interface Session extends NextAuthSession {
+  interface Session {
     user: {
       id: string
       name?: string | null
