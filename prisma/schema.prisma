@@ -63,40 +63,53 @@ model Stock {
   id            String   @id @default(cuid())
   symbol        String   @unique // VD: VNM, VCB, HPG
   name          String   // Tên công ty
-  exchange      String   // HOSE, HNX, UPCOM
+  exchange      String?  // HOSE, HNX, UPCOM
   sector        String?  // Ngành
   industry      String?  // Lĩnh vực
   marketCap     Float?   // Vốn hóa thị trường
   listedShares  Float?   // Số cổ phiếu niêm yết
+  
+  // Current price data
   currentPrice  Float?   // Giá hiện tại
-  change        Float?   // Thay đổi
+  changeValue   Float?   // Thay đổi giá trị
   changePercent Float?   // % thay đổi
   volume        Int?     // Khối lượng giao dịch
+  high          Float?   // Giá cao nhất trong ngày
+  low           Float?   // Giá thấp nhất trong ngày
+  open          Float?   // Giá mở cửa
+  close         Float?   // Giá đóng cửa
+  tradingDate   String?  // Ngày giao dịch
+  
+  // Financial ratios
+  eps           Float?   // Earnings per share
+  pe            Float?   // Price to earnings ratio
+  pb            Float?   // Price to book ratio
+  roe           Float?   // Return on equity
+  roa           Float?   // Return on assets
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   
-  stockData     StockData[]
   portfolioStocks PortfolioStock[]
   backtestTrades BacktestTrade[]
   news          News[]
   events        Event[]
 }
 
-model StockData {
+model StockHistory {
   id        String   @id @default(cuid())
-  stockId   String
-  date      DateTime
+  symbol    String   // Symbol instead of stockId for direct reference
+  date      String   // Date as string (YYYY-MM-DD)
   open      Float
   high      Float
   low       Float
   close     Float
   volume    Int
   value     Float    // Giá trị giao dịch
+  createdAt DateTime @default(now())
   
-  stock     Stock    @relation(fields: [stockId], references: [id], onDelete: Cascade)
-  
-  @@unique([stockId, date])
-  @@index([stockId, date])
+  @@unique([symbol, date])
+  @@index([symbol, date])
 }
 
 model Portfolio {

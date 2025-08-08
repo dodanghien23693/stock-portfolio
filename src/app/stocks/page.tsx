@@ -5,10 +5,29 @@ import { useStockStore } from "@/store/stockStore";
 import { Search, Filter, BarChart3 } from "lucide-react";
 import { formatCurrency, formatPercent, formatNumber } from "@/lib/utils";
 import Link from "next/link";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,12 +38,47 @@ export default function StocksPage() {
   const [exchangeFilter, setExchangeFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("symbol");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchStocks();
   }, [fetchStocks]);
 
-  const filteredStocks = stocks
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await fetchStocks();
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const testDatabase = async () => {
+    try {
+      const response = await fetch("/api/test");
+      const data = await response.json();
+      alert(JSON.stringify(data, null, 2));
+    } catch (error) {
+      alert("Database test failed: " + error);
+    }
+  };
+
+  const createSampleData = async () => {
+    try {
+      const response = await fetch("/api/stocks/sample", {
+        method: "POST"
+      });
+      const data = await response.json();
+      alert(data.message);
+      if (data.count > 0) {
+        await handleRefresh();
+      }
+    } catch (error) {
+      alert("Failed to create sample data: " + error);
+    }
+  };
+
+  const filteredStocks = (stocks || [])
     .filter((stock) => {
       const matchesSearch =
         stock.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -90,12 +144,31 @@ export default function StocksPage() {
   return (
     <div className="space-y-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Danh sách mã chứng khoán
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Theo dõi và phân tích các mã chứng khoán Việt Nam
-        </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Danh sách mã chứng khoán
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Theo dõi và phân tích các mã chứng khoán Việt Nam
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={testDatabase} variant="outline" size="sm">
+              Test DB
+            </Button>
+            <Button onClick={createSampleData} variant="outline" size="sm">
+              Sample Data
+            </Button>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              variant="outline"
+            >
+              {isRefreshing ? "Refreshing..." : "Refresh"}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Filters and Search */}
@@ -156,38 +229,38 @@ export default function StocksPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("symbol")}
                   >
                     Mã CK {getSortIcon("symbol")}
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("name")}
                   >
                     Tên công ty {getSortIcon("name")}
                   </TableHead>
                   <TableHead>Sàn</TableHead>
-                  <TableHead 
+                  <TableHead
                     className="text-right cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("currentPrice")}
                   >
                     Giá {getSortIcon("currentPrice")}
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="text-right cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("change")}
                   >
                     Thay đổi {getSortIcon("change")}
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="text-right cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("volume")}
                   >
                     KL {getSortIcon("volume")}
                   </TableHead>
-                  <TableHead 
+                  <TableHead
                     className="text-right cursor-pointer hover:bg-gray-100"
                     onClick={() => handleSort("marketCap")}
                   >
@@ -209,18 +282,24 @@ export default function StocksPage() {
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="text-sm text-gray-900">{stock.name}</div>
+                        <div className="text-sm text-gray-900">
+                          {stock.name}
+                        </div>
                         {stock.sector && (
-                          <div className="text-xs text-gray-500">{stock.sector}</div>
+                          <div className="text-xs text-gray-500">
+                            {stock.sector}
+                          </div>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge 
+                      <Badge
                         variant={
-                          stock.exchange === "HOSE" ? "destructive" : 
-                          stock.exchange === "HNX" ? "default" : 
-                          "secondary"
+                          stock.exchange === "HOSE"
+                            ? "destructive"
+                            : stock.exchange === "HNX"
+                            ? "default"
+                            : "secondary"
                         }
                       >
                         {stock.exchange}
@@ -230,11 +309,19 @@ export default function StocksPage() {
                       {formatCurrency(stock.currentPrice)}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className={`${stock.change >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      <div
+                        className={`${
+                          stock.change >= 0 ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
                         {stock.change >= 0 ? "+" : ""}
                         {stock.change.toFixed(2)}
                       </div>
-                      <div className={`text-xs ${stock.change >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      <div
+                        className={`text-xs ${
+                          stock.change >= 0 ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
                         ({formatPercent(stock.changePercent)})
                       </div>
                     </TableCell>
@@ -259,7 +346,19 @@ export default function StocksPage() {
 
           {!isLoadingStocks && filteredStocks.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">Không tìm thấy cổ phiếu nào</p>
+              <p className="text-gray-500 mb-4">
+                {stocks && stocks.length === 0
+                  ? "Chưa có dữ liệu cổ phiếu trong database"
+                  : "Không tìm thấy cổ phiếu nào"}
+              </p>
+              {stocks && stocks.length === 0 && (
+                <div className="space-y-2 text-sm text-gray-400">
+                  <p>Hãy thử:</p>
+                  <p>1. Kiểm tra kết nối database bằng nút "Test DB"</p>
+                  <p>2. Đồng bộ dữ liệu từ Python Service</p>
+                  <p>3. Import dữ liệu mẫu từ API</p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

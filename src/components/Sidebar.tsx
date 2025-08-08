@@ -9,6 +9,7 @@ import {
   PlayCircle,
   Newspaper,
   Calendar,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +43,11 @@ const navigation = [
     name: "Sự kiện",
     href: "/events",
     icon: Calendar,
+  },
+  {
+    name: "Python Service",
+    href: "/python-service",
+    icon: Settings,
   },
 ];
 
