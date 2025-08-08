@@ -1,36 +1,159 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vietnam Stock Analysis Platform
 
-## Getting Started
+Một nền tảng phân tích chứng khoán Việt Nam với khả năng backtest chiến lược trading.
 
-First, run the development server:
+## Tính năng chính
 
+- 📊 **Hiển thị biểu đồ**: Xem biểu đồ giá cổ phiếu với các chỉ báo kỹ thuật
+- 📰 **Tin tức & Sự kiện**: Theo dõi tin tức và các sự kiện quan trọng
+- 💼 **Quản lý Portfolio**: Tạo và quản lý danh mục đầu tư
+- 🔬 **Backtest**: Kiểm thử các chiến lược trading với dữ liệu lịch sử
+- 🔐 **Xác thực**: Đăng nhập bằng Google OAuth
+
+## Công nghệ sử dụng
+
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **State Management**: Zustand
+- **Database**: PostgreSQL với Prisma ORM
+- **Authentication**: NextAuth.js
+- **Charts**: Recharts
+- **Icons**: Lucide React
+
+## Yêu cầu hệ thống
+
+- Node.js 18+
+- PostgreSQL 14+
+- npm hoặc yarn
+
+## Cài đặt
+
+1. **Clone repository**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd stock-porfolio
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Cài đặt dependencies**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Cấu hình môi trường**
+Cập nhật các giá trị trong `.env.local`:
+```env
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/stockporfolio"
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# NextAuth.js
+NEXTAUTH_SECRET="your-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
 
-## Learn More
+# Google OAuth
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
-To learn more about Next.js, take a look at the following resources:
+# Vietnam Stock API (placeholder)
+VNDIRECT_API_KEY="your-vndirect-api-key"
+SSI_API_KEY="your-ssi-api-key"
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Thiết lập database**
+```bash
+# Tạo database
+createdb stockporfolio
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Chạy migrations
+npx prisma migrate dev
 
-## Deploy on Vercel
+# Generate Prisma client
+npx prisma generate
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Chạy ứng dụng**
+```bash
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ứng dụng sẽ chạy tại `http://localhost:3000`
+
+## Cấu trúc dự án
+
+```
+src/
+├── app/                    # App Router (Next.js 14)
+│   ├── api/               # API routes
+│   ├── stocks/            # Trang cổ phiếu
+│   ├── portfolio/         # Trang portfolio
+│   ├── backtest/          # Trang backtest
+│   └── page.tsx           # Trang chủ
+├── components/            # React components
+├── lib/                   # Utilities và cấu hình
+├── store/                 # Zustand stores
+└── types/                 # TypeScript type definitions
+
+prisma/
+├── schema.prisma          # Database schema
+└── migrations/            # Database migrations
+```
+
+## Database Schema
+
+### Các bảng chính:
+
+- **User**: Thông tin người dùng
+- **Stock**: Thông tin cổ phiếu
+- **StockData**: Dữ liệu giá lịch sử
+- **Portfolio**: Danh mục đầu tư
+- **Backtest**: Kết quả backtest
+- **News**: Tin tức
+- **Event**: Sự kiện
+
+## Tính năng chính
+
+### 1. Trang chủ (Dashboard)
+- Tổng quan thị trường (VN-Index, HNX-Index, UPCOM-Index)
+- Danh sách cổ phiếu giao dịch gần đây
+- Thống kê tổng quan
+
+### 2. Danh sách cổ phiếu
+- Hiển thị dạng bảng với khả năng sắp xếp, lọc
+- Tìm kiếm theo mã hoặc tên công ty
+- Lọc theo sàn giao dịch
+
+### 3. Chi tiết cổ phiếu
+- Biểu đồ giá với các chỉ báo kỹ thuật
+- Thông tin cơ bản công ty
+- Tin tức và sự kiện liên quan
+
+### 4. Portfolio Management
+- Tạo và quản lý nhiều portfolio
+- Theo dõi P&L realtime
+- Phân tích hiệu suất
+
+### 5. Backtest Engine
+- Thiết lập chiến lược trading
+- Backtest với dữ liệu lịch sử
+- Báo cáo kết quả chi tiết (ROI, Sharpe ratio, Max Drawdown)
+
+## Deployment
+
+### Sử dụng Vercel:
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+## Đóng góp
+
+1. Fork repository
+2. Tạo feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Tạo Pull Request
+
+## License
+
+MIT License
