@@ -1,5 +1,7 @@
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { BacktestEngine } from "@/lib/improved-backtest-engine";
+import { TRADING_STRATEGIES } from "@/lib/trading-strategies";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -56,33 +58,102 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { name, description, startDate, endDate, initialCash, strategy } =
-      await request.json();
+    const { 
+      name, 
+      description, 
+      startDate, 
+      endDate, 
+      initialCash, 
+      strategyKey,
+      strategyParams,
+      stockSymbols 
+    } = await request.json();
 
+    // Validate strategy
+    const strategy = TRADING_STRATEGIES[strategyKey];
+    if (!strategy) {
+      return NextResponse.json(
+        { error: "Invalid strategy selected" },
+        { status: 400 }
+      );
+    }
+
+    // Create backtest record
     const backtest = await prisma.backtest.create({
       data: {
         userId: user.id,
         name,
-        description,
+        description: description || strategy.description,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         initialCash,
         status: "pending",
       },
-      include: {
-        trades: {
-          include: {
-            stock: true,
-          },
-        },
-      },
     });
 
-    // Start backtest execution (this would be done in background)
-    // For now, we'll just mark it as completed
-    // TODO: Implement actual backtest strategy execution
+    // Run backtest in background
+    try {
+      const engine = new BacktestEngine();
+      
+      // Apply custom parameters to strategy if provided
+      const customStrategy = strategyParams 
+        ? { ...strategy, parameters: { ...strategy.parameters, ...strategyParams } }
+        : strategy;
 
-    return NextResponse.json(backtest);
+      const result = await engine.runBacktest(
+        backtest.id,
+        customStrategy,
+        stockSymbols || ['VCB', 'VIC', 'GAS', 'MSN'], // Default symbols
+        new Date(startDate),
+        new Date(endDate),
+        initialCash
+      );
+
+      // Update backtest with results
+      await prisma.backtest.update({
+        where: { id: backtest.id },
+        data: {
+          status: "completed",
+          finalCash: result.finalCash,
+          totalReturn: result.totalReturnPercent / 100,
+          maxDrawdown: result.maxDrawdown,
+          winRate: result.winRate,
+          sharpeRatio: result.sharpeRatio,
+        },
+      });
+
+      // Return updated backtest with trades
+      const updatedBacktest = await prisma.backtest.findUnique({
+        where: { id: backtest.id },
+        include: {
+          trades: {
+            include: {
+              stock: true,
+            },
+            orderBy: { date: "asc" },
+          },
+        },
+      });
+
+      return NextResponse.json(updatedBacktest);
+
+    } catch (backtestError: any) {
+      console.error("Backtest execution error:", backtestError);
+      
+      // Mark backtest as failed
+      await prisma.backtest.update({
+        where: { id: backtest.id },
+        data: {
+          status: "failed",
+        },
+      });
+
+      return NextResponse.json(
+        { error: "Backtest execution failed", details: backtestError?.message || "Unknown error" },
+        { status: 500 }
+      );
+    }
+
   } catch (error) {
     console.error("Error creating backtest:", error);
     return NextResponse.json(
