@@ -59,12 +59,12 @@ export const TRADING_STRATEGIES: { [key: string]: TradingStrategy } = {
 };
 
 export const STRATEGY_CATEGORIES = {
-  'Cơ bản': ['smaStrategy', 'buyAndHold'],
-  'Động lượng': ['rsiStrategy', 'macdStrategy', 'tripleMA', 'momentumContinuation'],
+  'Cơ bản': ['smaStrategy', 'buyAndHold', 'tripleMA'],
+  'Động lượng': ['rsiStrategy', 'macdStrategy', 'momentumContinuation'],
   'Hồi quy trung bình': ['bollingerBands', 'contrarian'],
   'Đột phá': ['breakoutStrategy', 'volatilityBreakout'],
-  'Nâng cao': ['multiFactorStrategy'],
-  'Bảo thủ': ['defensiveValue']
+  'Đa yếu tố': ['multiFactorStrategy'],
+  'Giá trị': ['defensiveValue']
 } as const;
 
 export const STRATEGY_DESCRIPTIONS = {

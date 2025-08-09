@@ -6,8 +6,8 @@ import { groupPricesBySymbol, checkRiskManagement } from './utils/trading-utils'
  * RSI Strategy - Mua khi RSI quá bán, bán khi RSI quá mua
  */
 export const rsiStrategy: TradingStrategy = {
-  name: "RSI Mean Reversion Strategy",
-  description: "Buy when RSI oversold (<30), sell when RSI overbought (>70)",
+  name: "Chiến lược RSI",
+  description: "Mua khi RSI quá bán (<30), bán khi RSI quá mua (>70)",
   parameters: {
     rsiPeriod: 14,
     oversoldLevel: 30,
@@ -101,8 +101,8 @@ export const rsiStrategy: TradingStrategy = {
  * MACD Strategy
  */
 export const macdStrategy: TradingStrategy = {
-  name: "MACD Strategy",
-  description: "Buy when MACD crosses above signal line, sell when crosses below",
+  name: "Chiến lược MACD",
+  description: "Mua khi MACD cắt lên signal line, bán khi cắt xuống",
   parameters: {
     fastPeriod: 12,
     slowPeriod: 26,

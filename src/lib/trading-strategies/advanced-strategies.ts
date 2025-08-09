@@ -6,8 +6,8 @@ import { groupPricesBySymbol, detectMarketTrend, checkRiskManagement } from './u
  * Triple Moving Average Strategy
  */
 export const tripleMAStrategy: TradingStrategy = {
-  name: "Triple Moving Average Strategy",
-  description: "Uses 3 MA periods for trend confirmation",
+  name: "Chiến lược Triple Moving Average",
+  description: "Sử dụng 3 đường MA để xác nhận xu hướng",
   parameters: {
     fastPeriod: 5,
     mediumPeriod: 15,
@@ -100,8 +100,8 @@ export const tripleMAStrategy: TradingStrategy = {
  * Breakout Strategy
  */
 export const breakoutStrategy: TradingStrategy = {
-  name: "Breakout Strategy",
-  description: "Buy when price breaks above resistance, sell when breaks below support",
+  name: "Chiến lược Breakout",
+  description: "Mua khi giá vượt kháng cự, bán khi thủng hỗ trợ",
   parameters: {
     lookbackPeriod: 20,
     breakoutConfirmation: 0.02 // 2% breakout confirmation
@@ -187,8 +187,8 @@ export const breakoutStrategy: TradingStrategy = {
  * Multi-factor Strategy - Kết hợp nhiều chỉ báo
  */
 export const multiFactorStrategy: TradingStrategy = {
-  name: "Multi-Factor Strategy",
-  description: "Combines multiple technical indicators for signal confirmation",
+  name: "Chiến lược Multi-Factor",
+  description: "Kết hợp nhiều chỉ báo kỹ thuật để xác nhận tín hiệu",
   parameters: {
     smaShort: 10,
     smaLong: 30,

@@ -10,7 +10,7 @@ export async function GET() {
     const strategies = Object.entries(TRADING_STRATEGIES).map(([key, strategy]) => ({
       key,
       name: strategy.name,
-      description: strategy.description,
+      description: STRATEGY_DESCRIPTIONS[key as keyof typeof STRATEGY_DESCRIPTIONS] || strategy.description,
       parameters: strategy.parameters,
       category: findStrategyCategory(key),
     }));

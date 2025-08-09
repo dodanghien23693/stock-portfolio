@@ -7,8 +7,8 @@ import { groupPricesBySymbol, checkRiskManagement, calculateVolatility } from '.
  * Mua khi giá vượt qua upper Bollinger Band với volume cao
  */
 export const volatilityBreakoutStrategy: TradingStrategy = {
-  name: "Volatility Breakout Strategy",
-  description: "Buy on high volume breakouts above Bollinger upper band",
+  name: "Chiến lược Volatility Breakout",
+  description: "Mua khi có breakout khối lượng cao vượt dải Bollinger trên",
   parameters: {
     bbPeriod: 20,
     bbDeviation: 2,
@@ -98,8 +98,8 @@ export const volatilityBreakoutStrategy: TradingStrategy = {
  * Mua khi RSI quá bán và giá gần support, bán khi RSI quá mua
  */
 export const contrarianStrategy: TradingStrategy = {
-  name: "Contrarian Mean Reversion Strategy",
-  description: "Buy oversold near support, sell overbought near resistance",
+  name: "Chiến lược Contrarian",
+  description: "Mua khi quá bán gần hỗ trợ, bán khi quá mua gần kháng cự",
   parameters: {
     rsiPeriod: 14,
     supportResistancePeriod: 20,
@@ -202,8 +202,8 @@ export const contrarianStrategy: TradingStrategy = {
  * Theo trend khi có momentum mạnh
  */
 export const momentumContinuationStrategy: TradingStrategy = {
-  name: "Momentum Continuation Strategy", 
-  description: "Follow strong momentum trends with volume confirmation",
+  name: "Chiến lược Momentum Continuation", 
+  description: "Theo đuổi xu hướng momentum mạnh với xác nhận khối lượng",
   parameters: {
     smaPeriod: 21,
     momentumPeriod: 10,
@@ -317,8 +317,8 @@ export const momentumContinuationStrategy: TradingStrategy = {
  * Chiến thuật thận trọng, mua khi giảm sâu với volume thấp (accumulation)
  */
 export const defensiveValueStrategy: TradingStrategy = {
-  name: "Defensive Value Strategy",
-  description: "Conservative buying on price weakness with low volume accumulation",
+  name: "Chiến lược Defensive Value",
+  description: "Mua bảo thủ khi giá yếu với khối lượng tích lũy thấp",
   parameters: {
     smaPeriod: 50,
     maxDrawdownFromPeak: 0.15, // Mua khi giá giảm 15% từ đỉnh

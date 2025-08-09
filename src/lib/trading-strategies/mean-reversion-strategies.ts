@@ -6,8 +6,8 @@ import { groupPricesBySymbol, checkRiskManagement } from './utils/trading-utils'
  * Bollinger Bands Mean Reversion Strategy
  */
 export const bollingerBandsStrategy: TradingStrategy = {
-  name: "Bollinger Bands Strategy",
-  description: "Buy when price touches lower band, sell when touches upper band",
+  name: "Chiến lược Bollinger Bands",
+  description: "Mua khi giá chạm dải dưới, bán khi chạm dải trên",
   parameters: {
     period: 20,
     deviation: 2
@@ -89,8 +89,8 @@ export const bollingerBandsStrategy: TradingStrategy = {
  * Buy and Hold Strategy - Cải tiến
  */
 export const buyAndHoldStrategy: TradingStrategy = {
-  name: "Buy and Hold Strategy",
-  description: "Buy equal amounts of each stock and hold for long term",
+  name: "Chiến lược Mua và Nắm giữ",
+  description: "Mua số lượng bằng nhau cho mỗi cổ phiếu và nắm giữ dài hạn",
   parameters: {
     rebalanceFrequency: 30 // Rebalance every 30 days
   },

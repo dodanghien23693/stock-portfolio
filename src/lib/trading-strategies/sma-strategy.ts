@@ -7,8 +7,8 @@ import { groupPricesBySymbol, calculatePositionSize, checkRiskManagement } from 
  * Mua khi SMA ngắn hạn cắt lên SMA dài hạn, bán khi ngược lại
  */
 export const smaStrategy: TradingStrategy = {
-  name: "SMA Crossover Strategy",
-  description: "Buy when short SMA crosses above long SMA, sell when crosses below",
+  name: "Chiến lược SMA Crossover",
+  description: "Mua khi SMA ngắn hạn cắt lên SMA dài hạn, bán khi cắt xuống",
   parameters: {
     shortPeriod: 10,
     longPeriod: 30,
