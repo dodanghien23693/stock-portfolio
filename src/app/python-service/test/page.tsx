@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { showToast } from "@/lib/toast";
 
 interface TestResult {
   endpoint: string;
@@ -157,7 +158,7 @@ export default function PythonServiceTestPage() {
       const result = await runSingleTest(testCase);
       setTestResults([result, ...testResults]);
     } catch (error) {
-      alert(`Test failed: ${error}`);
+      showToast.error(`Test failed: ${error}`, "Custom Test Failed");
     }
     
     setLoading(false);

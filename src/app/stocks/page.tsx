@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useStockStore } from "@/store/stockStore";
 import { Search, Filter, BarChart3 } from "lucide-react";
 import { formatCurrency, formatPercent, formatNumber } from "@/lib/utils";
+import { showToast } from "@/lib/toast";
 import Link from "next/link";
 import {
   Card,
@@ -57,24 +58,27 @@ export default function StocksPage() {
     try {
       const response = await fetch("/api/test");
       const data = await response.json();
-      alert(JSON.stringify(data, null, 2));
+      showToast.info(JSON.stringify(data, null, 2), "Database Test Result");
     } catch (error) {
-      alert("Database test failed: " + error);
+      showToast.error("Database test failed: " + error, "Database Test Failed");
     }
   };
 
   const createSampleData = async () => {
     try {
       const response = await fetch("/api/stocks/sample", {
-        method: "POST"
+        method: "POST",
       });
       const data = await response.json();
-      alert(data.message);
+      showToast.success(data.message, "Sample Data Created");
       if (data.count > 0) {
         await handleRefresh();
       }
     } catch (error) {
-      alert("Failed to create sample data: " + error);
+      showToast.error(
+        "Failed to create sample data: " + error,
+        "Sample Data Failed"
+      );
     }
   };
 
@@ -154,12 +158,12 @@ export default function StocksPage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={testDatabase} variant="outline" size="sm">
+            {/* <Button onClick={testDatabase} variant="outline" size="sm">
               Test DB
-            </Button>
-            <Button onClick={createSampleData} variant="outline" size="sm">
+            </Button> */}
+            {/* <Button onClick={createSampleData} variant="outline" size="sm">
               Sample Data
-            </Button>
+            </Button> */}
             <Button
               onClick={handleRefresh}
               disabled={isRefreshing}

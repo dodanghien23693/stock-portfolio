@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { showToast } from "@/lib/toast";
 
 interface ServiceStatus {
   status: "healthy" | "unhealthy" | "unreachable";
@@ -53,12 +54,12 @@ export default function PythonServicePage() {
 
       const data = await response.json();
       if (response.ok) {
-        alert("Sync started successfully!");
+        showToast.success("Sync started successfully!");
       } else {
-        alert(`Sync failed: ${data.error}`);
+        showToast.error(`Sync failed: ${data.error}`);
       }
     } catch (error) {
-      alert("Failed to start sync");
+      showToast.error("Failed to start sync");
     }
     setLoading(false);
   };
@@ -76,12 +77,12 @@ export default function PythonServicePage() {
 
       const data = await response.json();
       if (response.ok) {
-        alert("Tracked stocks sync started successfully!");
+        showToast.success("Tracked stocks sync started successfully!");
       } else {
-        alert(`Sync failed: ${data.error}`);
+        showToast.error(`Sync failed: ${data.error}`);
       }
     } catch (error) {
-      alert("Failed to start tracked stocks sync");
+      showToast.error("Failed to start tracked stocks sync");
     }
     setLoading(false);
   };
