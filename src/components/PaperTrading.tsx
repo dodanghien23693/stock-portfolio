@@ -61,7 +61,7 @@ export function PaperTrading() {
   const [showNewStrategy, setShowNewStrategy] = useState(false);
   const [newStrategyForm, setNewStrategyForm] = useState({
     name: "",
-    initialCapital: 10000000, // 10M VND
+    initialCash: 10000000, // 10M VND
     stockSymbols: ["VCB", "VIC", "GAS", "MSN"],
   });
   const [selectedStrategy, setSelectedStrategy] =
@@ -149,7 +149,7 @@ export function PaperTrading() {
       setShowNewStrategy(false);
       setNewStrategyForm({
         name: "",
-        initialCapital: 10000000,
+        initialCash: 10000000,
         stockSymbols: ["VCB", "VIC", "GAS", "MSN"],
       });
       setSelectedStrategy(null);
@@ -292,15 +292,15 @@ export function PaperTrading() {
                 </div>
 
                 <div>
-                  <Label htmlFor="initialCapital">Initial Capital (VND)</Label>
+                  <Label htmlFor="initialCash">Initial Cash (VND)</Label>
                   <Input
-                    id="initialCapital"
+                    id="initialCash"
                     type="number"
-                    value={newStrategyForm.initialCapital}
+                    value={newStrategyForm.initialCash}
                     onChange={(e) =>
                       setNewStrategyForm((prev) => ({
                         ...prev,
-                        initialCapital: Number(e.target.value),
+                        initialCash: Number(e.target.value),
                       }))
                     }
                   />

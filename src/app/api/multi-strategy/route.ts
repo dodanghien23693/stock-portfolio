@@ -16,7 +16,7 @@ interface MultiStrategyRequest {
   description?: string;
   startDate: string;
   endDate: string;
-  initialCapital: number;
+  initialCash: number;
   stockSymbols: string[];
   strategies: StrategyAllocation[];
 }
@@ -41,13 +41,16 @@ export async function POST(request: Request) {
       description,
       startDate,
       endDate,
-      initialCapital,
+      initialCash,
       stockSymbols,
-      strategies
+      strategies,
     }: MultiStrategyRequest = await request.json();
 
     // Validate allocations sum to 100%
-    const totalAllocation = strategies.reduce((sum, s) => sum + s.allocation, 0);
+    const totalAllocation = strategies.reduce(
+      (sum, s) => sum + s.allocation,
+      0
+    );
     if (Math.abs(totalAllocation - 100) > 0.01) {
       return NextResponse.json(
         { error: "Strategy allocations must sum to 100%" },
@@ -71,11 +74,18 @@ export async function POST(request: Request) {
     // Run backtest for each strategy with allocated capital
     for (const strategyAllocation of strategies) {
       const strategy = TRADING_STRATEGIES[strategyAllocation.strategyKey];
-      const allocatedCapital = (initialCapital * strategyAllocation.allocation) / 100;
+      const allocatedCapital =
+        (initialCash * strategyAllocation.allocation) / 100;
 
       // Apply custom parameters if provided
       const customStrategy = strategyAllocation.parameters
-        ? { ...strategy, parameters: { ...strategy.parameters, ...strategyAllocation.parameters } }
+        ? {
+            ...strategy,
+            parameters: {
+              ...strategy.parameters,
+              ...strategyAllocation.parameters,
+            },
+          }
         : strategy;
 
       // Create individual backtest for this strategy
@@ -83,7 +93,9 @@ export async function POST(request: Request) {
         data: {
           userId: user.id,
           name: `${name} - ${strategy.name}`,
-          description: `${description || ''} (${strategyAllocation.allocation}% allocation)`,
+          description: `${description || ""} (${
+            strategyAllocation.allocation
+          }% allocation)`,
           startDate: new Date(startDate),
           endDate: new Date(endDate),
           initialCash: allocatedCapital,
@@ -125,12 +137,11 @@ export async function POST(request: Request) {
           winRate: result.winRate,
           maxDrawdown: result.maxDrawdown,
           sharpeRatio: result.sharpeRatio,
-          backtestId: backtest.id
+          backtestId: backtest.id,
         });
-
       } catch (error) {
         console.error(`Error running strategy ${strategy.name}:`, error);
-        
+
         await prisma.backtest.update({
           where: { id: backtest.id },
           data: { status: "failed" },
@@ -141,37 +152,43 @@ export async function POST(request: Request) {
           strategyName: strategy.name,
           allocation: strategyAllocation.allocation,
           allocatedCapital,
-          error: error instanceof Error ? error.message : "Unknown error"
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }
 
     // Calculate portfolio-level metrics
-    const successfulResults = results.filter(r => !r.error);
-    const totalFinalValue = successfulResults.reduce((sum, r) => sum + r.finalValue, 0);
-    const portfolioReturn = ((totalFinalValue - initialCapital) / initialCapital) * 100;
-    
-    // Weighted average of metrics
-    const weightedWinRate = successfulResults.reduce((sum, r) => 
-      sum + (r.winRate * r.allocation / 100), 0
+    const successfulResults = results.filter((r) => !r.error);
+    const totalFinalValue = successfulResults.reduce(
+      (sum, r) => sum + r.finalValue,
+      0
     );
-    
-    const maxPortfolioDrawdown = Math.max(...successfulResults.map(r => r.maxDrawdown || 0));
+    const portfolioReturn =
+      ((totalFinalValue - initialCash) / initialCash) * 100;
+
+    // Weighted average of metrics
+    const weightedWinRate = successfulResults.reduce(
+      (sum, r) => sum + (r.winRate * r.allocation) / 100,
+      0
+    );
+
+    const maxPortfolioDrawdown = Math.max(
+      ...successfulResults.map((r) => r.maxDrawdown || 0)
+    );
 
     const portfolioSummary = {
       name,
       totalStrategies: strategies.length,
       successfulStrategies: successfulResults.length,
-      initialCapital,
+      initialCash: initialCash,
       finalValue: totalFinalValue,
       totalReturn: portfolioReturn,
       weightedWinRate,
       maxDrawdown: maxPortfolioDrawdown,
-      strategies: results
+      strategies: results,
     };
 
     return NextResponse.json(portfolioSummary);
-
   } catch (error) {
     console.error("Error running multi-strategy backtest:", error);
     return NextResponse.json(

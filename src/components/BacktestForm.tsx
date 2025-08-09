@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,21 +35,27 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
     description: "",
     startDate: "2024-01-01",
     endDate: "2024-12-31",
-    initialCapital: 100000000, // 100M VND
-    stockSymbols: ["VCB", "VIC", "GAS", "MSN", "VHM"]
+    initialCash: 100000000, // 100M VND
+    stockSymbols: ["VCB", "VIC", "GAS", "MSN", "VHM"],
   });
-  const [singleStrategy, setSingleStrategy] = useState<StrategySelection | null>(null);
-  const [multiStrategies, setMultiStrategies] = useState<StrategySelection[]>([]);
+  const [singleStrategy, setSingleStrategy] =
+    useState<StrategySelection | null>(null);
+  const [multiStrategies, setMultiStrategies] = useState<StrategySelection[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (key: string, value: any) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleStockSymbolsChange = (value: string) => {
-    const symbols = value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
-    setFormData(prev => ({ ...prev, stockSymbols: symbols }));
+    const symbols = value
+      .split(",")
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean);
+    setFormData((prev) => ({ ...prev, stockSymbols: symbols }));
   };
 
   const runSingleStrategyBacktest = async () => {
@@ -51,42 +63,43 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
       toast({
         title: "Error",
         description: "Please select a trading strategy",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch('/api/backtests', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/backtests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           strategyKey: singleStrategy.strategyKey,
-          strategyParams: singleStrategy.parameters
-        })
+          strategyParams: singleStrategy.parameters,
+        }),
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to run backtest');
+        throw new Error(result.error || "Failed to run backtest");
       }
 
       toast({
         title: "Backtest Completed",
-        description: `Strategy: ${singleStrategy.strategyKey} | Return: ${(result.totalReturn * 100).toFixed(2)}%`
+        description: `Strategy: ${singleStrategy.strategyKey} | Return: ${(
+          result.totalReturn * 100
+        ).toFixed(2)}%`,
       });
 
       onBacktestComplete?.(result);
-      
     } catch (error) {
-      console.error('Backtest error:', error);
+      console.error("Backtest error:", error);
       toast({
         title: "Backtest Failed",
         description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -98,55 +111,63 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
       toast({
         title: "Error",
         description: "Please select at least one trading strategy",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    const totalAllocation = multiStrategies.reduce((sum, s) => sum + (s.allocation || 0), 0);
+    const totalAllocation = multiStrategies.reduce(
+      (sum, s) => sum + (s.allocation || 0),
+      0
+    );
     if (Math.abs(totalAllocation - 100) > 0.01) {
       toast({
         title: "Error",
         description: "Strategy allocations must sum to 100%",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch('/api/multi-strategy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/multi-strategy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          strategies: multiStrategies.map(s => ({
+          strategies: multiStrategies.map((s) => ({
             strategyKey: s.strategyKey,
             allocation: s.allocation,
-            parameters: s.parameters
-          }))
-        })
+            parameters: s.parameters,
+          })),
+        }),
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to run multi-strategy backtest');
+        throw new Error(
+          result.error || "Failed to run multi-strategy backtest"
+        );
       }
 
       toast({
         title: "Multi-Strategy Backtest Completed",
-        description: `Portfolio Return: ${result.totalReturn.toFixed(2)}% | Strategies: ${result.successfulStrategies}/${result.totalStrategies}`
+        description: `Portfolio Return: ${result.totalReturn.toFixed(
+          2
+        )}% | Strategies: ${result.successfulStrategies}/${
+          result.totalStrategies
+        }`,
       });
 
       onBacktestComplete?.(result);
-      
     } catch (error) {
-      console.error('Multi-strategy backtest error:', error);
+      console.error("Multi-strategy backtest error:", error);
       toast({
         title: "Backtest Failed",
         description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -173,17 +194,19 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                   placeholder="My Backtest Strategy"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
                   placeholder="Description of your backtest..."
                   rows={3}
                 />
@@ -191,7 +214,10 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="startDate" className="flex items-center gap-1">
+                  <Label
+                    htmlFor="startDate"
+                    className="flex items-center gap-1"
+                  >
                     <CalendarIcon className="h-3 w-3" />
                     Start Date
                   </Label>
@@ -199,10 +225,12 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
                     id="startDate"
                     type="date"
                     value={formData.startDate}
-                    onChange={(e) => handleInputChange('startDate', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("startDate", e.target.value)
+                    }
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="endDate" className="flex items-center gap-1">
                     <CalendarIcon className="h-3 w-3" />
@@ -212,7 +240,9 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
                     id="endDate"
                     type="date"
                     value={formData.endDate}
-                    onChange={(e) => handleInputChange('endDate', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("endDate", e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -220,16 +250,18 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="initialCapital">Initial Capital (VND)</Label>
+                <Label htmlFor="initialCash">Initial Capital (VND)</Label>
                 <Input
-                  id="initialCapital"
+                  id="initialCash"
                   type="number"
-                  value={formData.initialCapital}
-                  onChange={(e) => handleInputChange('initialCapital', Number(e.target.value))}
+                  value={formData.initialCash}
+                  onChange={(e) =>
+                    handleInputChange("initialCash", Number(e.target.value))
+                  }
                   placeholder="100000000"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Current: {(formData.initialCapital / 1000000).toFixed(0)}M VND
+                  Current: {(formData.initialCash / 1000000).toFixed(0)}M VND
                 </p>
               </div>
 
@@ -237,7 +269,7 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
                 <Label htmlFor="stockSymbols">Stock Symbols</Label>
                 <Input
                   id="stockSymbols"
-                  value={formData.stockSymbols.join(', ')}
+                  value={formData.stockSymbols.join(", ")}
                   onChange={(e) => handleStockSymbolsChange(e.target.value)}
                   placeholder="VCB, VIC, GAS, MSN"
                 />
@@ -249,7 +281,7 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
               <div className="pt-2">
                 <Label className="text-sm font-medium">Selected Stocks</Label>
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {formData.stockSymbols.map(symbol => (
+                  {formData.stockSymbols.map((symbol) => (
                     <Badge key={symbol} variant="outline" className="text-xs">
                       {symbol}
                     </Badge>
@@ -274,15 +306,17 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
               <TabsTrigger value="single">Single Strategy</TabsTrigger>
               <TabsTrigger value="multi">Multi-Strategy Portfolio</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="single" className="mt-6">
               <StrategySelector
                 mode="single"
-                onStrategySelect={(selection) => setSingleStrategy(selection as StrategySelection)}
+                onStrategySelect={(selection) =>
+                  setSingleStrategy(selection as StrategySelection)
+                }
               />
-              
+
               <div className="mt-6 flex justify-end">
-                <Button 
+                <Button
                   onClick={runSingleStrategyBacktest}
                   disabled={!singleStrategy || loading}
                   className="min-w-32"
@@ -291,16 +325,18 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
                 </Button>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="multi" className="mt-6">
               <StrategySelector
                 mode="multi"
-                onStrategySelect={(selections) => setMultiStrategies(selections as StrategySelection[])}
+                onStrategySelect={(selections) =>
+                  setMultiStrategies(selections as StrategySelection[])
+                }
                 selectedStrategies={multiStrategies}
               />
-              
+
               <div className="mt-6 flex justify-end">
-                <Button 
+                <Button
                   onClick={runMultiStrategyBacktest}
                   disabled={multiStrategies.length === 0 || loading}
                   className="min-w-32"

@@ -31,17 +31,17 @@ export async function GET() {
           avgPrice: 21.5,
           currentPrice: 22.1,
           unrealizedPnL: 60,
-          strategy: "RSI Strategy"
+          strategy: "RSI Strategy",
         },
         {
-          id: "2", 
+          id: "2",
           symbol: "VIC",
           quantity: 200,
           avgPrice: 24.0,
           currentPrice: 23.5,
           unrealizedPnL: -100,
-          strategy: "SMA Strategy"
-        }
+          strategy: "SMA Strategy",
+        },
       ],
       activeStrategies: [
         {
@@ -49,16 +49,16 @@ export async function GET() {
           name: "RSI Strategy",
           status: "active",
           totalReturn: 2.5,
-          dayChange: 0.8
+          dayChange: 0.8,
         },
         {
           id: "strategy-2",
-          name: "SMA Strategy", 
+          name: "SMA Strategy",
           status: "active",
           totalReturn: -1.2,
-          dayChange: -0.3
-        }
-      ]
+          dayChange: -0.3,
+        },
+      ],
     };
 
     return NextResponse.json(paperTradingData);
@@ -87,29 +87,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { 
-      strategyKey, 
-      strategyParams, 
-      initialCapital, 
-      stockSymbols,
-      name 
-    } = await request.json();
+    const { strategyKey, strategyParams, initialCash, stockSymbols, name } =
+      await request.json();
 
     // TODO: Implement paper trading strategy start logic
     // For now return success
-    
+
     const paperTrading = {
       id: `paper-${Date.now()}`,
       name: name || `Paper Trading ${strategyKey}`,
       strategyKey,
       strategyParams,
-      initialCapital,
+      initialCash,
       stockSymbols,
       status: "active",
       startDate: new Date(),
-      currentValue: initialCapital,
+      currentValue: initialCash,
       totalReturn: 0,
-      positions: []
+      positions: [],
     };
 
     return NextResponse.json(paperTrading);

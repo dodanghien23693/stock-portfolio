@@ -50,7 +50,7 @@ interface MultiStrategyResult {
   name: string;
   totalStrategies: number;
   successfulStrategies: number;
-  initialCapital: number;
+  initialCash: number;
   finalValue: number;
   totalReturn: number;
   weightedWinRate: number;

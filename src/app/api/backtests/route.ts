@@ -58,22 +58,43 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { 
-      name, 
-      description, 
-      startDate, 
-      endDate, 
-      initialCash, 
+    const {
+      name,
+      description,
+      startDate,
+      endDate,
+      initialCash,
       strategyKey,
       strategyParams,
-      stockSymbols 
+      stockSymbols,
     } = await request.json();
+
+    // Debug logging
+    console.log("Request data:", {
+      name,
+      description,
+      startDate,
+      endDate,
+      initialCash,
+      initialCashType: typeof initialCash,
+      strategyKey,
+      strategyParams,
+      stockSymbols,
+    });
 
     // Validate strategy
     const strategy = TRADING_STRATEGIES[strategyKey];
     if (!strategy) {
       return NextResponse.json(
         { error: "Invalid strategy selected" },
+        { status: 400 }
+      );
+    }
+
+    // Validate initialCash
+    if (!initialCash || isNaN(parseFloat(initialCash))) {
+      return NextResponse.json(
+        { error: "Initial cash must be a valid number" },
         { status: 400 }
       );
     }
@@ -86,7 +107,7 @@ export async function POST(request: Request) {
         description: description || strategy.description,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
-        initialCash,
+        initialCash: parseFloat(initialCash),
         status: "pending",
       },
     });
@@ -94,16 +115,19 @@ export async function POST(request: Request) {
     // Run backtest in background
     try {
       const engine = new BacktestEngine();
-      
+
       // Apply custom parameters to strategy if provided
-      const customStrategy = strategyParams 
-        ? { ...strategy, parameters: { ...strategy.parameters, ...strategyParams } }
+      const customStrategy = strategyParams
+        ? {
+            ...strategy,
+            parameters: { ...strategy.parameters, ...strategyParams },
+          }
         : strategy;
 
       const result = await engine.runBacktest(
         backtest.id,
         customStrategy,
-        stockSymbols || ['VCB', 'VIC', 'GAS', 'MSN'], // Default symbols
+        stockSymbols || ["VCB", "VIC", "GAS", "MSN"], // Default symbols
         new Date(startDate),
         new Date(endDate),
         initialCash
@@ -136,10 +160,9 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json(updatedBacktest);
-
     } catch (backtestError: any) {
       console.error("Backtest execution error:", backtestError);
-      
+
       // Mark backtest as failed
       await prisma.backtest.update({
         where: { id: backtest.id },
@@ -149,11 +172,13 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json(
-        { error: "Backtest execution failed", details: backtestError?.message || "Unknown error" },
+        {
+          error: "Backtest execution failed",
+          details: backtestError?.message || "Unknown error",
+        },
         { status: 500 }
       );
     }
-
   } catch (error) {
     console.error("Error creating backtest:", error);
     return NextResponse.json(
