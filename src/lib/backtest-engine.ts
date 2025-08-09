@@ -111,36 +111,30 @@ export class BacktestEngine {
     startDate: Date,
     endDate: Date
   ): Promise<StockPrice[]> {
-    const stocks = await prisma.stock.findMany({
-      where: { symbol: { in: symbols } },
-      include: {
-        stockData: {
-          where: {
-            date: {
-              gte: startDate,
-              lte: endDate
-            }
-          },
-          orderBy: { date: 'asc' }
+    // Convert dates to string format used in StockHistory
+    const startDateStr = startDate.toISOString().split('T')[0]
+    const endDateStr = endDate.toISOString().split('T')[0]
+
+    const stockHistories = await prisma.stockHistory.findMany({
+      where: {
+        symbol: { in: symbols },
+        date: {
+          gte: startDateStr,
+          lte: endDateStr
         }
-      }
+      },
+      orderBy: { date: 'asc' }
     })
 
-    const stockPrices: StockPrice[] = []
-    
-    stocks.forEach(stock => {
-      stock.stockData.forEach(data => {
-        stockPrices.push({
-          date: data.date,
-          symbol: stock.symbol,
-          open: data.open,
-          high: data.high,
-          low: data.low,
-          close: data.close,
-          volume: data.volume
-        })
-      })
-    })
+    const stockPrices: StockPrice[] = stockHistories.map(history => ({
+      date: new Date(history.date),
+      symbol: history.symbol,
+      open: history.open,
+      high: history.high,
+      low: history.low,
+      close: history.close,
+      volume: history.volume
+    }))
 
     return stockPrices.sort((a, b) => a.date.getTime() - b.date.getTime())
   }

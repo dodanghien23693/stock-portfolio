@@ -117,10 +117,17 @@ export default function BacktestPage() {
 
   const loadBacktests = async () => {
     try {
+      console.log('Loading backtests...')
       const response = await fetch("/api/backtests");
+      console.log('Response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Backtests data:', data)
         setBacktests(data);
+      } else {
+        const errorText = await response.text();
+        console.error('Error response:', response.status, errorText);
       }
     } catch (error) {
       console.error("Error loading backtests:", error);
@@ -602,10 +609,7 @@ export default function BacktestPage() {
           <form onSubmit={createBacktest}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label 
-                  htmlFor="name"
-                  className="select-text cursor-text"
-                >
+                <Label htmlFor="name" className="select-text cursor-text">
                   Tên Backtest
                 </Label>
                 <Input
@@ -620,7 +624,7 @@ export default function BacktestPage() {
               </div>
 
               <div className="space-y-2">
-                <Label 
+                <Label
                   htmlFor="description"
                   className="select-text cursor-text"
                 >
@@ -642,7 +646,7 @@ export default function BacktestPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label 
+                  <Label
                     htmlFor="startDate"
                     className="select-text cursor-text"
                   >
@@ -662,10 +666,7 @@ export default function BacktestPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label 
-                    htmlFor="endDate"
-                    className="select-text cursor-text"
-                  >
+                  <Label htmlFor="endDate" className="select-text cursor-text">
                     Ngày kết thúc
                   </Label>
                   <Input
@@ -684,7 +685,7 @@ export default function BacktestPage() {
               </div>
 
               <div className="space-y-2">
-                <Label 
+                <Label
                   htmlFor="initialCash"
                   className="select-text cursor-text"
                 >
@@ -694,9 +695,8 @@ export default function BacktestPage() {
                   id="initialCash"
                   value={newBacktest.initialCash}
                   onChange={(value) => {
-                    setNewBacktest({ ...newBacktest, initialCash: value })
+                    setNewBacktest({ ...newBacktest, initialCash: value });
                   }}
-                  placeholder="1,000,000,000"
                   formatWithCommas={true}
                   allowFloat={false}
                   required
@@ -729,10 +729,7 @@ export default function BacktestPage() {
           <form onSubmit={runBacktest}>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label 
-                  htmlFor="strategy"
-                  className="select-text cursor-text"
-                >
+                <Label htmlFor="strategy" className="select-text cursor-text">
                   Chiến lược
                 </Label>
                 <Select
@@ -753,7 +750,7 @@ export default function BacktestPage() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="select-text cursor-text">
                   Chọn cổ phiếu (tối đa 5 mã)
@@ -787,8 +784,8 @@ export default function BacktestPage() {
                           runConfig.symbols.length >= 5
                         }
                       />
-                      <Label 
-                        htmlFor={stock.id} 
+                      <Label
+                        htmlFor={stock.id}
                         className="text-sm select-text cursor-text"
                       >
                         {stock.symbol} - {stock.name}

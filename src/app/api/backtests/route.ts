@@ -1,21 +1,21 @@
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { getServerSession } from 'next-auth'
-import { NextResponse } from 'next/server'
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    })
+      where: { email: session.user.email },
+    });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     const backtests = await prisma.backtest.findMany({
@@ -23,40 +23,41 @@ export async function GET() {
       include: {
         trades: {
           include: {
-            stock: true
+            stock: true,
           },
-          orderBy: { date: 'asc' }
-        }
+          orderBy: { date: "asc" },
+        },
       },
-      orderBy: { createdAt: 'desc' }
-    })
+      orderBy: { createdAt: "desc" },
+    });
 
-    return NextResponse.json(backtests)
+    return NextResponse.json(backtests);
   } catch (error) {
-    console.error('Error fetching backtests:', error)
+    console.error("Error fetching backtests:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch backtests' },
+      { error: "Failed to fetch backtests" },
       { status: 500 }
-    )
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    })
+      where: { email: session.user.email },
+    });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { name, description, startDate, endDate, initialCash, strategy } = await request.json()
+    const { name, description, startDate, endDate, initialCash, strategy } =
+      await request.json();
 
     const backtest = await prisma.backtest.create({
       data: {
@@ -66,27 +67,27 @@ export async function POST(request: Request) {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         initialCash,
-        status: 'pending'
+        status: "pending",
       },
       include: {
         trades: {
           include: {
-            stock: true
-          }
-        }
-      }
-    })
+            stock: true,
+          },
+        },
+      },
+    });
 
     // Start backtest execution (this would be done in background)
     // For now, we'll just mark it as completed
     // TODO: Implement actual backtest strategy execution
 
-    return NextResponse.json(backtest)
+    return NextResponse.json(backtest);
   } catch (error) {
-    console.error('Error creating backtest:', error)
+    console.error("Error creating backtest:", error);
     return NextResponse.json(
-      { error: 'Failed to create backtest' },
+      { error: "Failed to create backtest" },
       { status: 500 }
-    )
+    );
   }
 }
