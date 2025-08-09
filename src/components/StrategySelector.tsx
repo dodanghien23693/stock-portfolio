@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { useRouter } from "next/navigation";
 
 interface Strategy {
   key: string;
@@ -42,6 +43,7 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentSelection, setCurrentSelection] = useState<StrategySelection[]>(selectedStrategies);
   const [showParameters, setShowParameters] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchStrategies();
@@ -123,11 +125,11 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">
-            {mode === 'single' ? 'Select Trading Strategy' : 'Multi-Strategy Portfolio'}
+            {mode === 'single' ? 'Chọn chiến lược giao dịch' : 'Danh mục đa chiến lược'}
           </h3>
           {mode === 'multi' && (
             <Badge variant={totalAllocation === 100 ? "default" : "destructive"}>
-              Total Allocation: {totalAllocation.toFixed(1)}%
+              Tổng phân bổ: {totalAllocation.toFixed(1)}%
             </Badge>
           )}
         </div>
@@ -137,7 +139,7 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="all">Tất cả danh mục</SelectItem>
             {Object.keys(categories).map(category => (
               <SelectItem key={category} value={category}>{category}</SelectItem>
             ))}
@@ -166,18 +168,32 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
                       {strategy.category}
                     </Badge>
                   </div>
-                  {isSelected && (
+                  <div className="flex gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setShowParameters(showParameters === strategy.key ? null : strategy.key);
+                        router.push(`/strategies/${strategy.key}`);
                       }}
+                      title="Xem chi tiết"
                     >
-                      ⚙️
+                      📖
                     </Button>
-                  )}
+                    {isSelected && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowParameters(showParameters === strategy.key ? null : strategy.key);
+                        }}
+                        title="Cài đặt tham số"
+                      >
+                        ⚙️
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
@@ -187,7 +203,7 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
                 
                 {mode === 'multi' && isSelected && selection && (
                   <div className="space-y-2 mt-3 pt-3 border-t">
-                    <Label className="text-xs">Allocation: {selection.allocation?.toFixed(1)}%</Label>
+                    <Label className="text-xs">Phân bổ: {selection.allocation?.toFixed(1)}%</Label>
                     <Slider
                       value={[selection.allocation || 0]}
                       onValueChange={([value]: number[]) => handleAllocationChange(strategy.key, value)}
@@ -201,7 +217,7 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
 
                 {showParameters === strategy.key && isSelected && (
                   <div className="mt-3 pt-3 border-t space-y-3" onClick={(e) => e.stopPropagation()}>
-                    <Label className="text-xs font-medium">Parameters</Label>
+                    <Label className="text-xs font-medium">Tham số</Label>
                     {Object.entries(strategy.parameters).map(([key, value]) => (
                       <div key={key} className="space-y-1">
                         <Label className="text-xs text-gray-600">{key}</Label>
@@ -249,7 +265,7 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
       {mode === 'multi' && currentSelection.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Selected Strategies</CardTitle>
+            <CardTitle className="text-sm">Chiến lược đã chọn</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">

@@ -59,25 +59,25 @@ export const TRADING_STRATEGIES: { [key: string]: TradingStrategy } = {
 };
 
 export const STRATEGY_CATEGORIES = {
-  'Basic': ['smaStrategy', 'buyAndHold'],
-  'Momentum': ['rsiStrategy', 'macdStrategy', 'tripleMA', 'momentumContinuation'],
-  'Mean Reversion': ['bollingerBands', 'contrarian'],
-  'Breakout': ['breakoutStrategy', 'volatilityBreakout'],
-  'Advanced': ['multiFactorStrategy'],
-  'Conservative': ['defensiveValue']
+  'Cơ bản': ['smaStrategy', 'buyAndHold'],
+  'Động lượng': ['rsiStrategy', 'macdStrategy', 'tripleMA', 'momentumContinuation'],
+  'Hồi quy trung bình': ['bollingerBands', 'contrarian'],
+  'Đột phá': ['breakoutStrategy', 'volatilityBreakout'],
+  'Nâng cao': ['multiFactorStrategy'],
+  'Bảo thủ': ['defensiveValue']
 } as const;
 
 export const STRATEGY_DESCRIPTIONS = {
-  smaStrategy: 'Simple Moving Average crossover strategy for trend following',
-  buyAndHold: 'Simple buy and hold strategy for long-term investing',
-  rsiStrategy: 'RSI mean reversion strategy for oversold/overbought conditions',
-  macdStrategy: 'MACD momentum strategy with signal line crossovers',
-  tripleMA: 'Triple moving average strategy with enhanced trend confirmation',
-  momentumContinuation: 'Follow strong momentum trends with volume confirmation',
-  bollingerBands: 'Bollinger Bands mean reversion strategy',
-  contrarian: 'Buy oversold near support, sell overbought near resistance',
-  breakoutStrategy: 'Price breakout strategy above resistance/below support',
-  volatilityBreakout: 'High volume breakouts above Bollinger upper band',
-  multiFactorStrategy: 'Advanced strategy combining multiple technical indicators',
-  defensiveValue: 'Conservative buying on price weakness with low volume accumulation'
+  smaStrategy: 'Chiến lược cắt đường trung bình động đơn giản để bắt xu hướng',
+  buyAndHold: 'Chiến lược mua và nắm giữ dài hạn cho đầu tư bền vững',
+  rsiStrategy: 'Chiến lược RSI dựa trên vùng quá mua/quá bán',
+  macdStrategy: 'Chiến lược MACD với tín hiệu cắt đường tín hiệu',
+  tripleMA: 'Chiến lược ba đường trung bình để xác nhận xu hướng mạnh',
+  momentumContinuation: 'Theo đuổi xu hướng mạnh với xác nhận khối lượng',
+  bollingerBands: 'Chiến lược Bollinger Bands dựa trên hồi quy trung bình',
+  contrarian: 'Mua khi quá bán gần hỗ trợ, bán khi quá mua gần kháng cự',
+  breakoutStrategy: 'Chiến lược đột phá giá qua vùng kháng cự/hỗ trợ',
+  volatilityBreakout: 'Đột phá với khối lượng cao qua dải Bollinger trên',
+  multiFactorStrategy: 'Chiến lược nâng cao kết hợp nhiều chỉ báo kỹ thuật',
+  defensiveValue: 'Mua bảo thủ khi giá yếu với khối lượng tích lũy thấp'
 } as const;

@@ -86,7 +86,9 @@ export function PaperTrading() {
           totalValue: data?.totalValue || 0,
           cashBalance: data?.cashBalance || 0,
           positions: Array.isArray(data?.positions) ? data.positions : [],
-          activeStrategies: Array.isArray(data?.activeStrategies) ? data.activeStrategies : [],
+          activeStrategies: Array.isArray(data?.activeStrategies)
+            ? data.activeStrategies
+            : [],
         });
       } else {
         // Set default empty state on API error
@@ -327,7 +329,8 @@ export function PaperTrading() {
             )}
 
             <div className="space-y-3">
-              {paperData?.activeStrategies && paperData.activeStrategies.length > 0 ? (
+              {paperData?.activeStrategies &&
+              paperData.activeStrategies.length > 0 ? (
                 paperData.activeStrategies.map((strategy) => (
                   <div
                     key={strategy.id}
@@ -349,7 +352,9 @@ export function PaperTrading() {
                         </Badge>
                       </div>
                       <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                        <span>Total: {formatPercent(strategy.totalReturn)}</span>
+                        <span>
+                          Total: {formatPercent(strategy.totalReturn)}
+                        </span>
                         <span
                           className={
                             strategy.dayChange >= 0
