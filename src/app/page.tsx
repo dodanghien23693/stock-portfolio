@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { useStockStore } from '@/store/stockStore'
 import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react'
-import { formatCurrency, formatPercent } from '@/lib/utils'
+import { formatCurrency, formatPercent, formatLargeNumber } from '@/lib/utils'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
@@ -105,7 +105,7 @@ export default function HomePage() {
               <div className="ml-4">
                 <div className="text-sm font-medium text-gray-500">Tổng giá trị GD</div>
                 <div className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(mockStats.totalValue)}
+                  {formatLargeNumber(mockStats.totalValue)}
                 </div>
                 <div className="text-sm text-gray-500">Hôm nay</div>
               </div>

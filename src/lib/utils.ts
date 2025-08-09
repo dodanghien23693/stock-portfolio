@@ -9,7 +9,29 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
-  }).format(amount)
+  }).format(amount * 1000)
+}
+
+export function formatLargeNumber(amount: number): string {
+  // Chuyển đổi từ nghìn sang đơn vị thực
+  const realAmount = amount * 1000;
+  
+  if (realAmount >= 1000000000000) {
+    // Nghìn tỷ
+    return `${(realAmount / 1000000000000).toFixed(1)} nghìn tỷ ₫`;
+  } else if (realAmount >= 1000000000) {
+    // Tỷ
+    return `${(realAmount / 1000000000).toFixed(1)} tỷ ₫`;
+  } else if (realAmount >= 1000000) {
+    // Triệu
+    return `${(realAmount / 1000000).toFixed(1)} triệu ₫`;
+  } else if (realAmount >= 1000) {
+    // Nghìn
+    return `${(realAmount / 1000).toFixed(1)} nghìn ₫`;
+  } else {
+    // Dưới nghìn
+    return `${realAmount.toFixed(0)} ₫`;
+  }
 }
 
 export function formatNumber(num: number): string {
