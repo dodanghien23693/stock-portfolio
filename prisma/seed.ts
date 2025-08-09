@@ -106,52 +106,72 @@ async function main() {
     })
     console.log(`Created stock: ${createdStock.symbol}`)
 
-    // Tạo dữ liệu giá mẫu cho 30 ngày gần đây
+    // Tạo dữ liệu giá mẫu cho 365 ngày gần đây để có đủ dữ liệu cho backtest
     const startDate = new Date()
-    startDate.setDate(startDate.getDate() - 30)
+    startDate.setDate(startDate.getDate() - 365)
     
-    let currentPrice = Math.random() * 100 + 20 // Giá từ 20-120k
+    let currentPrice = Math.random() * 30 + 20 // Giá từ 20-50k (hợp lý hơn)
     
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 365; i++) {
       const date = new Date(startDate)
       date.setDate(date.getDate() + i)
+      const dateString = date.toISOString().split('T')[0] // Format YYYY-MM-DD
       
-      // Biến động giá ngẫu nhiên
-      const change = (Math.random() - 0.5) * 0.1 // ±5%
-      currentPrice = currentPrice * (1 + change)
+      // Biến động giá thực tế hơn
+      const weekday = date.getDay()
+      const isWeekend = weekday === 0 || weekday === 6
       
-      const open = currentPrice * (1 + (Math.random() - 0.5) * 0.02)
-      const high = Math.max(open, currentPrice) * (1 + Math.random() * 0.03)
-      const low = Math.min(open, currentPrice) * (1 - Math.random() * 0.03)
-      const volume = Math.floor(Math.random() * 10000000) + 1000000
-      const value = currentPrice * volume
-      
-      await prisma.stockData.upsert({
-        where: {
-          stockId_date: {
-            stockId: createdStock.id,
-            date: date,
+      if (!isWeekend) { // Chỉ tạo dữ liệu cho ngày làm việc
+        // Trend dài hạn nhẹ (±0.05% mỗi ngày)
+        const longTermTrend = Math.sin(i / 100) * 0.0005 
+        
+        // Biến động ngẫu nhiên hàng ngày (±3%)
+        const dailyVolatility = (Math.random() - 0.5) * 0.06
+        
+        // Một số ngày có volatility cao (5% khả năng)
+        const highVolatility = Math.random() < 0.05 ? (Math.random() - 0.5) * 0.1 : 0
+        
+        // Áp dụng thay đổi giá
+        const totalChange = longTermTrend + dailyVolatility + highVolatility
+        currentPrice = currentPrice * (1 + totalChange)
+        
+        // Đảm bảo giá không âm và hợp lý
+        currentPrice = Math.max(5, Math.min(200, currentPrice))
+        
+        const open = currentPrice * (1 + (Math.random() - 0.5) * 0.02)
+        const close = currentPrice
+        const high = Math.max(open, close) * (1 + Math.random() * 0.02)
+        const low = Math.min(open, close) * (1 - Math.random() * 0.02)
+        const volume = Math.floor(Math.random() * 5000000) + 500000 // 500k - 5.5M shares
+        const value = close * volume
+        
+        await prisma.stockHistory.upsert({
+          where: {
+            symbol_date: {
+              symbol: stock.symbol,
+              date: dateString,
+            },
           },
-        },
-        update: {
-          open: open,
-          high: high,
-          low: low,
-          close: currentPrice,
-          volume: volume,
-          value: value,
-        },
-        create: {
-          stockId: createdStock.id,
-          date: date,
-          open: open,
-          high: high,
-          low: low,
-          close: currentPrice,
-          volume: volume,
-          value: value,
-        },
-      })
+          update: {
+            open: Number(open.toFixed(2)),
+            high: Number(high.toFixed(2)),
+            low: Number(low.toFixed(2)),
+            close: Number(close.toFixed(2)),
+            volume: volume,
+            value: Number(value.toFixed(2)),
+          },
+          create: {
+            symbol: stock.symbol,
+            date: dateString,
+            open: Number(open.toFixed(2)),
+            high: Number(high.toFixed(2)),
+            low: Number(low.toFixed(2)),
+            close: Number(close.toFixed(2)),
+            volume: volume,
+            value: Number(value.toFixed(2)),
+          },
+        })
+      }
     }
   }
 

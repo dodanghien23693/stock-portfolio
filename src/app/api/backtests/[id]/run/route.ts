@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { backtestEngine, TRADING_STRATEGIES } from '@/lib/backtest-engine'
+import { backtestEngine } from '@/lib/improved-backtest-engine'
+import { TRADING_STRATEGIES } from '@/lib/trading-strategies'
 
 export async function POST(
   request: Request,
@@ -37,8 +38,13 @@ export async function POST(
     // Get strategy
     const tradingStrategy = TRADING_STRATEGIES[strategy]
     if (!tradingStrategy) {
-      return NextResponse.json({ error: 'Invalid strategy' }, { status: 400 })
+      return NextResponse.json({ 
+        error: 'Invalid strategy',
+        availableStrategies: Object.keys(TRADING_STRATEGIES)
+      }, { status: 400 })
     }
+
+    console.log(`Running backtest ${id} with strategy ${strategy} for symbols: ${symbols.join(', ')}`)
 
     // Run backtest in background
     const result = await backtestEngine.runBacktest(
@@ -52,12 +58,19 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      result
+      result,
+      strategy: {
+        name: tradingStrategy.name,
+        description: tradingStrategy.description
+      }
     })
   } catch (error) {
     console.error('Error running backtest:', error)
     return NextResponse.json(
-      { error: 'Failed to run backtest' },
+      { 
+        error: 'Failed to run backtest',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
