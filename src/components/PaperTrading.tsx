@@ -184,7 +184,7 @@ export function PaperTrading() {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
-    }).format(amount);
+    }).format(amount * 1000);
   };
 
   const formatPercent = (percent: number) => {
