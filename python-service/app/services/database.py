@@ -4,7 +4,7 @@ from typing import List, Optional, Dict, Any
 import pandas as pd
 from datetime import datetime
 import logging
-from config import settings
+from ..config import settings
 from cuid import cuid
 
 logger = logging.getLogger(__name__)

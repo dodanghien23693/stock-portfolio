@@ -1,0 +1,165 @@
+{
+  "timestamp": "2025-08-09T23:15:28.757375",
+  "base_url": "http://localhost:8001",
+  "test_symbols": [
+    "VCB",
+    "VIC",
+    "VHM",
+    "MSN",
+    "FPT"
+  ],
+  "results": [
+    {
+      "endpoint": "/",
+      "method": "GET",
+      "status": 200,
+      "response_time": 2.0369646549224854,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:15.570753"
+    },
+    {
+      "endpoint": "/health",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.0017423629760742188,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:15.573006"
+    },
+    {
+      "endpoint": "/stocks/VCB/price",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.2073826789855957,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:15.781241"
+    },
+    {
+      "endpoint": "/stocks/VIC/price",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.14004921913146973,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:16.422411"
+    },
+    {
+      "endpoint": "/stocks/VHM/price",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.15710663795471191,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:17.081329"
+    },
+    {
+      "endpoint": "/stocks/INVALID123/price",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.13824868202209473,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:17.720780"
+    },
+    {
+      "endpoint": "/stocks/VCB/info",
+      "method": "GET",
+      "status": 200,
+      "response_time": 1.5003128051757812,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:19.222552"
+    },
+    {
+      "endpoint": "/stocks/VIC/info",
+      "method": "GET",
+      "status": 200,
+      "response_time": 1.8413057327270508,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:21.564949"
+    },
+    {
+      "endpoint": "/stocks/INVALID123/info",
+      "method": "GET",
+      "status": 500,
+      "response_time": 0.0031948089599609375,
+      "success": false,
+      "timestamp": "2025-08-09T23:15:22.069268"
+    },
+    {
+      "endpoint": "/stocks/VCB/history?period=1M",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.1666274070739746,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:22.236731"
+    },
+    {
+      "endpoint": "/stocks/VCB/history?period=3M",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.24397730827331543,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:22.981875"
+    },
+    {
+      "endpoint": "/stocks/VCB/history?period=1Y",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.16929197311401367,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:23.652745"
+    },
+    {
+      "endpoint": "/stocks/INVALID123/history",
+      "method": "GET",
+      "status": 500,
+      "response_time": 0.003086090087890625,
+      "success": false,
+      "timestamp": "2025-08-09T23:15:24.156707"
+    },
+    {
+      "endpoint": "/market/indices",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.6056582927703857,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:24.762982"
+    },
+    {
+      "endpoint": "/stocks/search?q=VCB&limit=5",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.33405351638793945,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:25.097886"
+    },
+    {
+      "endpoint": "/stocks/search?q=Vietcombank&limit=5",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.27738213539123535,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:25.676368"
+    },
+    {
+      "endpoint": "/stocks/search?q=ngân hàng&limit=5",
+      "method": "GET",
+      "status": 200,
+      "response_time": 0.32304978370666504,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:26.300675"
+    },
+    {
+      "endpoint": "/sync/stocks",
+      "method": "POST",
+      "status": 200,
+      "response_time": 0.004976034164428711,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:26.607412"
+    },
+    {
+      "endpoint": "/sync/tracked-stocks",
+      "method": "POST",
+      "status": 200,
+      "response_time": 2.148794651031494,
+      "success": true,
+      "timestamp": "2025-08-09T23:15:28.756570"
+    }
+  ]
+}

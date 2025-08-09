@@ -3,7 +3,7 @@ import pandas as pd
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import logging
-from models import StockPrice, StockInfo, StockHistory, StockHistoryData, MarketIndex
+from ..models import StockPrice, StockInfo, StockHistory, StockHistoryData, MarketIndex
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +91,6 @@ class VNStockService:
     def get_stock_info(self, symbol: str) -> Optional[StockInfo]:
         """Get stock company information using unified interface"""
         try:
-            # Use unified interface
-            stock = Vnstock().stock(symbol=symbol, source=self.default_source)
-            
             # Get company profile/overview
             try:
                 company = Company(symbol=symbol, source=self.default_source)

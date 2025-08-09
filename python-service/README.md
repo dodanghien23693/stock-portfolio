@@ -2,6 +2,45 @@
 
 Dịch vụ Python sử dụng thư viện vnstock để truy cập dữ liệu thị trường chứng khoán Việt Nam.
 
+## Cấu trúc thư mục
+
+```
+python-service/
+├── app/                     # Core application logic
+│   ├── __init__.py
+│   ├── main.py             # FastAPI app
+│   ├── config.py           # Configuration
+│   ├── models.py           # Data models
+│   ├── api/                # API routes
+│   │   ├── __init__.py
+│   │   └── routes.py       # All routes
+│   ├── services/           # Business logic
+│   │   ├── __init__.py
+│   │   ├── vnstock_service.py
+│   │   └── database.py
+│   └── utils/              # Utility functions
+│       └── __init__.py
+├── tests/                  # All test files
+│   ├── __init__.py
+│   ├── test_api.py         # API unit tests
+│   ├── test_database.py    # Database unit tests
+│   ├── test_vnstock.py     # VNStock service tests
+│   ├── integration/        # Integration tests
+│   │   ├── __init__.py
+│   │   ├── test_api_integration.py
+│   │   └── test_database_integration.py
+│   └── scripts/            # Test scripts
+│       ├── advanced_test.py
+│       ├── quick_test.py
+│       ├── simple_test.py
+│       └── run_all_tests.py
+├── .env
+├── .env.example
+├── requirements.txt
+├── README.md
+└── run.py                  # Entry point
+```
+
 ## Cài đặt
 
 1. Tạo virtual environment:
@@ -29,12 +68,41 @@ SYNC_INTERVAL_MINUTES=15
 ## Chạy service
 
 ```bash
-python main.py
+python run.py
 ```
 
 Hoặc với uvicorn:
 ```bash
-uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+```
+
+## Chạy tests
+
+### Unit tests
+```bash
+pytest tests/test_*.py -v
+```
+
+### Integration tests
+```bash
+pytest tests/integration/ -v -m integration
+```
+
+### Tất cả tests
+```bash
+pytest tests/ -v
+```
+
+### Test scripts (legacy)
+```bash
+# Quick test
+python tests/scripts/quick_test.py
+
+# Advanced test
+python tests/scripts/advanced_test.py
+
+# Run all legacy tests
+python tests/scripts/run_all_tests.py
 ```
 
 ## API Endpoints

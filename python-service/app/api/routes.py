@@ -1,45 +1,27 @@
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Optional
+from fastapi import APIRouter, HTTPException, BackgroundTasks
+from typing import List
 import logging
 import asyncio
 from datetime import datetime
 
-from config import settings
-from models import (
+from ..models import (
     StockPrice, StockInfo, StockHistory, SyncRequest, SyncResponse, MarketIndex
 )
-from vnstock_service import vnstock_service
-from database import db_service
+from ..services.vnstock_service import vnstock_service
+from ..services.database import db_service
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+router = APIRouter()
 
-app = FastAPI(
-    title="VNStock API Service",
-    description="Python service for Vietnam Stock Market data using vnstock",
-    version="1.0.0"
-)
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.get("/")
+@router.get("/")
 async def root():
     return {"message": "VNStock API Service is running", "timestamp": datetime.now()}
 
-@app.get("/health")
+@router.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now()}
 
-@app.get("/stocks/{symbol}/price", response_model=StockPrice)
+@router.get("/stocks/{symbol}/price", response_model=StockPrice)
 async def get_stock_price(symbol: str):
     """Get current stock price"""
     try:
@@ -51,7 +33,7 @@ async def get_stock_price(symbol: str):
         logger.error(f"Error getting stock price: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/stocks/{symbol}/info", response_model=StockInfo)
+@router.get("/stocks/{symbol}/info", response_model=StockInfo)
 async def get_stock_info(symbol: str):
     """Get stock company information"""
     try:
@@ -63,7 +45,7 @@ async def get_stock_info(symbol: str):
         logger.error(f"Error getting stock info: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/stocks/{symbol}/history", response_model=StockHistory)
+@router.get("/stocks/{symbol}/history", response_model=StockHistory)
 async def get_stock_history(symbol: str, period: str = "1Y"):
     """Get historical stock data"""
     try:
@@ -75,7 +57,7 @@ async def get_stock_history(symbol: str, period: str = "1Y"):
         logger.error(f"Error getting stock history: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/market/indices", response_model=List[MarketIndex])
+@router.get("/market/indices", response_model=List[MarketIndex])
 async def get_market_indices():
     """Get market indices data"""
     try:
@@ -85,7 +67,7 @@ async def get_market_indices():
         logger.error(f"Error getting market indices: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/stocks/search")
+@router.get("/stocks/search")
 async def search_stocks(q: str, limit: int = 10):
     """Search for stocks"""
     try:
@@ -95,7 +77,7 @@ async def search_stocks(q: str, limit: int = 10):
         logger.error(f"Error searching stocks: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/sync/stocks", response_model=SyncResponse)
+@router.post("/sync/stocks", response_model=SyncResponse)
 async def sync_stocks(request: SyncRequest, background_tasks: BackgroundTasks):
     """Sync stock data to database"""
     try:
@@ -112,7 +94,7 @@ async def sync_stocks(request: SyncRequest, background_tasks: BackgroundTasks):
         logger.error(f"Error starting sync: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/sync/tracked-stocks", response_model=SyncResponse)
+@router.post("/sync/tracked-stocks", response_model=SyncResponse)
 async def sync_tracked_stocks(background_tasks: BackgroundTasks, period: str = "3M"):
     """Sync all tracked stocks from portfolios"""
     try:
@@ -226,12 +208,3 @@ async def sync_stocks_task(symbols: List[str], period: str = "1Y"):
             failed_symbols.append(symbol)
     
     logger.info(f"Sync completed. Success: {len(synced_symbols)}, Failed: {len(failed_symbols)}")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(
-        "main:app",
-        host=settings.API_HOST,
-        port=settings.API_PORT,
-        reload=True
-    )
