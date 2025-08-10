@@ -1,84 +1,84 @@
-import React, { useState, useEffect } from 'react'
-import { NewsFilter, NewsCategory } from '@/types'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { X, Filter, Search, Calendar, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { newsApiService } from '@/lib/news-api'
+import React, { useState, useEffect } from "react";
+import { NewsFilter, NewsCategory } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  X,
+  Filter,
+  Calendar,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
+import { newsApiService } from "@/lib/news-api";
+import { MUIStockSelector } from "@/components/ui/mui-stock-selector";
 
 interface NewsFiltersProps {
-  filters: NewsFilter
-  onFiltersChange: (filters: NewsFilter) => void
-  onClearFilters: () => void
+  filters: NewsFilter;
+  onFiltersChange: (filters: NewsFilter) => void;
+  onClearFilters: () => void;
 }
 
-export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFiltersProps) {
-  const [categories, setCategories] = useState<NewsCategory[]>([])
-  const [symbolInput, setSymbolInput] = useState('')
-  const [isExpanded, setIsExpanded] = useState(false)
+export function NewsFilters({
+  filters,
+  onFiltersChange,
+  onClearFilters,
+}: NewsFiltersProps) {
+  const [categories, setCategories] = useState<NewsCategory[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const data = await newsApiService.getNewsCategories()
-        setCategories(data)
+        const data = await newsApiService.getNewsCategories();
+        setCategories(data);
       } catch (error) {
-        console.error('Error loading categories:', error)
+        console.error("Error loading categories:", error);
       }
-    }
-    loadCategories()
-  }, [])
+    };
+    loadCategories();
+  }, []);
 
   const handleCategoryChange = (category: string) => {
     onFiltersChange({
       ...filters,
-      category: category === 'all' ? undefined : category
-    })
-  }
+      category: category === "all" ? undefined : category,
+    });
+  };
 
   const handleSentimentChange = (sentiment: string) => {
     onFiltersChange({
       ...filters,
-      sentiment: sentiment === 'all' ? undefined : (sentiment as 'positive' | 'negative' | 'neutral')
-    })
-  }
+      sentiment:
+        sentiment === "all"
+          ? undefined
+          : (sentiment as "positive" | "negative" | "neutral"),
+    });
+  };
 
-  const handleAddSymbol = () => {
-    if (symbolInput.trim()) {
-      const currentSymbols = filters.symbols || []
-      const newSymbol = symbolInput.trim().toUpperCase()
-      
-      if (!currentSymbols.includes(newSymbol)) {
-        onFiltersChange({
-          ...filters,
-          symbols: [...currentSymbols, newSymbol]
-        })
-      }
-      setSymbolInput('')
-    }
-  }
-
-  const handleRemoveSymbol = (symbolToRemove: string) => {
-    const currentSymbols = filters.symbols || []
+  const handleSymbolsChange = (selectedSymbols: string | string[]) => {
     onFiltersChange({
       ...filters,
-      symbols: currentSymbols.filter(s => s !== symbolToRemove)
-    })
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleAddSymbol()
-    }
-  }
+      symbols: Array.isArray(selectedSymbols)
+        ? selectedSymbols
+        : [selectedSymbols],
+    });
+  };
 
   const hasActiveFilters = !!(
     filters.category ||
     filters.sentiment ||
     (filters.symbols && filters.symbols.length > 0)
-  )
+  );
 
   return (
     <Card className="mb-6">
@@ -105,7 +105,7 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
               size="sm"
               onClick={() => setIsExpanded(!isExpanded)}
             >
-              {isExpanded ? 'Thu gọn' : 'Mở rộng'}
+              {isExpanded ? "Thu gọn" : "Mở rộng"}
             </Button>
           </div>
         </div>
@@ -118,7 +118,7 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
           <div>
             <label className="text-sm font-medium mb-2 block">Danh mục</label>
             <Select
-              value={filters.category || 'all'}
+              value={filters.category || "all"}
               onValueChange={handleCategoryChange}
             >
               <SelectTrigger>
@@ -128,7 +128,8 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
                 <SelectItem value="all">Tất cả danh mục</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category.id} value={category.id}>
-                    {newsApiService.getCategoryIcon(category.id)} {category.name}
+                    {newsApiService.getCategoryIcon(category.id)}{" "}
+                    {category.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -139,7 +140,7 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
           <div>
             <label className="text-sm font-medium mb-2 block">Tâm lý</label>
             <Select
-              value={filters.sentiment || 'all'}
+              value={filters.sentiment || "all"}
               onValueChange={handleSentimentChange}
             >
               <SelectTrigger>
@@ -174,49 +175,20 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
             </Select>
           </div>
 
-          {/* Symbol Input */}
+          {/* Symbol Selector */}
           <div>
-            <label className="text-sm font-medium mb-2 block">Mã cổ phiếu</label>
-            <div className="flex gap-2">
-              <Input
-                value={symbolInput}
-                onChange={(e) => setSymbolInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="VD: VCB, VNM..."
-                className="text-sm"
-              />
-              <Button
-                size="sm"
-                onClick={handleAddSymbol}
-                disabled={!symbolInput.trim()}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
+            <label className="text-sm font-medium mb-2 block">
+              Mã cổ phiếu
+            </label>
+            <MUIStockSelector
+              value={filters.symbols || []}
+              onValueChange={handleSymbolsChange}
+              placeholder="Chọn mã cổ phiếu..."
+              multiple={true}
+              className="text-sm"
+            />
           </div>
         </div>
-
-        {/* Selected Symbols */}
-        {filters.symbols && filters.symbols.length > 0 && (
-          <div className="mb-4">
-            <label className="text-sm font-medium mb-2 block">Mã đã chọn:</label>
-            <div className="flex flex-wrap gap-2">
-              {filters.symbols.map((symbol) => (
-                <Badge
-                  key={symbol}
-                  variant="secondary"
-                  className="flex items-center gap-1"
-                >
-                  {symbol}
-                  <X
-                    className="h-3 w-3 cursor-pointer hover:text-red-500"
-                    onClick={() => handleRemoveSymbol(symbol)}
-                  />
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Advanced Filters - Expandable */}
         {isExpanded && (
@@ -225,7 +197,9 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Date Range - Can be added later */}
               <div>
-                <label className="text-sm font-medium mb-2 block">Từ ngày</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Từ ngày
+                </label>
                 <Input
                   type="date"
                   className="text-sm"
@@ -233,7 +207,9 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
                 />
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Đến ngày</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Đến ngày
+                </label>
                 <Input
                   type="date"
                   className="text-sm"
@@ -251,16 +227,23 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
               <strong>Bộ lọc đang áp dụng:</strong>
               <ul className="mt-1 space-y-1">
                 {filters.category && (
-                  <li>• Danh mục: {newsApiService.getCategoryName(filters.category)}</li>
+                  <li>
+                    • Danh mục:{" "}
+                    {newsApiService.getCategoryName(filters.category)}
+                  </li>
                 )}
                 {filters.sentiment && (
-                  <li>• Tâm lý: {
-                    filters.sentiment === 'positive' ? 'Tích cực' :
-                    filters.sentiment === 'negative' ? 'Tiêu cực' : 'Trung tính'
-                  }</li>
+                  <li>
+                    • Tâm lý:{" "}
+                    {filters.sentiment === "positive"
+                      ? "Tích cực"
+                      : filters.sentiment === "negative"
+                      ? "Tiêu cực"
+                      : "Trung tính"}
+                  </li>
                 )}
                 {filters.symbols && filters.symbols.length > 0 && (
-                  <li>• Mã cổ phiếu: {filters.symbols.join(', ')}</li>
+                  <li>• Mã cổ phiếu: {filters.symbols.join(", ")}</li>
                 )}
               </ul>
             </div>
@@ -268,7 +251,7 @@ export function NewsFilters({ filters, onFiltersChange, onClearFilters }: NewsFi
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default NewsFilters
+export default NewsFilters;

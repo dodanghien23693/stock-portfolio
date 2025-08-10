@@ -6,9 +6,34 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const refresh = url.searchParams.get("refresh") === "true";
+    const search = url.searchParams.get("search");
+    const limit = parseInt(url.searchParams.get("limit") || "50");
+    
+    let whereClause = {};
+    
+    if (search) {
+      whereClause = {
+        OR: [
+          {
+            symbol: {
+              contains: search.toUpperCase(),
+              mode: "insensitive" as const,
+            },
+          },
+          {
+            name: {
+              contains: search,
+              mode: "insensitive" as const,
+            },
+          },
+        ],
+      };
+    }
     
     const stocks = await prisma.stock.findMany({
-      orderBy: { symbol: 'asc' }
+      where: whereClause,
+      orderBy: { symbol: 'asc' },
+      take: limit,
     });
 
     // If refresh is requested, try to update prices from API

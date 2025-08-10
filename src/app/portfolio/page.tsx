@@ -14,15 +14,8 @@ import { NumberInput } from "@/components/ui/number-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { MUIStockSelector } from "@/components/ui/mui-stock-selector";
+import { SimpleDialog } from "@/components/ui/compatible-dialog";
 import {
   Card,
   CardContent,
@@ -269,14 +262,13 @@ export default function PortfolioPage() {
             Quản lý và theo dõi danh mục đầu tư của bạn
           </p>
         </div>
-        <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-          <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
-              <PlusIcon className="h-4 w-4" />
-              Tạo Portfolio
-            </Button>
-          </DialogTrigger>
-        </Dialog>
+        <Button
+          className="flex items-center gap-2"
+          onClick={() => setShowCreateForm(true)}
+        >
+          <PlusIcon className="h-4 w-4" />
+          Tạo Portfolio
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -362,17 +354,13 @@ export default function PortfolioPage() {
                         </CardDescription>
                       )}
                     </div>
-                    <Dialog
-                      open={showAddStockForm}
-                      onOpenChange={setShowAddStockForm}
+                    <Button
+                      className="flex items-center gap-2"
+                      onClick={() => setShowAddStockForm(true)}
                     >
-                      <DialogTrigger asChild>
-                        <Button className="flex items-center gap-2">
-                          <PlusIcon className="h-4 w-4" />
-                          Thêm mã CK
-                        </Button>
-                      </DialogTrigger>
-                    </Dialog>
+                      <PlusIcon className="h-4 w-4" />
+                      Thêm mã CK
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -442,16 +430,12 @@ export default function PortfolioPage() {
                       <p className="text-gray-500 mb-4">
                         Chưa có cổ phiếu nào trong portfolio
                       </p>
-                      <Dialog
-                        open={showAddStockForm}
-                        onOpenChange={setShowAddStockForm}
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowAddStockForm(true)}
                       >
-                        <DialogTrigger asChild>
-                          <Button variant="outline">
-                            Thêm cổ phiếu đầu tiên
-                          </Button>
-                        </DialogTrigger>
-                      </Dialog>
+                        Thêm cổ phiếu đầu tiên
+                      </Button>
                     </div>
                   ) : (
                     <Table>
@@ -563,11 +547,9 @@ export default function PortfolioPage() {
             <Card>
               <CardContent className="text-center py-12">
                 <p className="text-gray-500 mb-4">Chưa có portfolio nào</p>
-                <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-                  <DialogTrigger asChild>
-                    <Button size="lg">Tạo Portfolio đầu tiên</Button>
-                  </DialogTrigger>
-                </Dialog>
+                <Button size="lg" onClick={() => setShowCreateForm(true)}>
+                  Tạo Portfolio đầu tiên
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -575,174 +557,172 @@ export default function PortfolioPage() {
       </div>
 
       {/* Create Portfolio Modal */}
-      <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Tạo Portfolio mới</DialogTitle>
-            <DialogDescription>
-              Tạo một portfolio mới để quản lý danh mục đầu tư của bạn.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={createPortfolio}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="select-text cursor-text">
-                  Tên Portfolio
-                </Label>
-                <Input
-                  id="name"
-                  value={newPortfolio.name}
-                  onChange={(e) =>
-                    setNewPortfolio({ ...newPortfolio, name: e.target.value })
-                  }
-                  placeholder="Nhập tên portfolio..."
-                  required
-                />
-              </div>
+      <SimpleDialog
+        open={showCreateForm}
+        onClose={() => setShowCreateForm(false)}
+        title="Tạo Portfolio mới"
+        description="Tạo một portfolio mới để quản lý danh mục đầu tư của bạn."
+        maxWidth="sm"
+        actions={
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowCreateForm(false)}
+            >
+              Hủy
+            </Button>
+            <Button type="submit" form="create-portfolio-form">
+              Tạo
+            </Button>
+          </div>
+        }
+      >
+        <form id="create-portfolio-form" onSubmit={createPortfolio}>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="select-text cursor-text">
+                Tên Portfolio
+              </Label>
+              <Input
+                id="name"
+                value={newPortfolio.name}
+                onChange={(e) =>
+                  setNewPortfolio({ ...newPortfolio, name: e.target.value })
+                }
+                placeholder="Nhập tên portfolio..."
+                required
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label
-                  htmlFor="description"
-                  className="select-text cursor-text"
-                >
-                  Mô tả
-                </Label>
-                <Textarea
-                  id="description"
-                  value={newPortfolio.description}
-                  onChange={(e) =>
+            <div className="space-y-2">
+              <Label htmlFor="description" className="select-text cursor-text">
+                Mô tả
+              </Label>
+              <Textarea
+                id="description"
+                value={newPortfolio.description}
+                onChange={(e) =>
+                  setNewPortfolio({
+                    ...newPortfolio,
+                    description: e.target.value,
+                  })
+                }
+                placeholder="Mô tả về portfolio này..."
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="isDefault" className="select-text cursor-text">
+                Cài đặt
+              </Label>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isDefault"
+                  checked={newPortfolio.isDefault}
+                  onCheckedChange={(checked) =>
                     setNewPortfolio({
                       ...newPortfolio,
-                      description: e.target.value,
+                      isDefault: checked === true,
                     })
                   }
-                  placeholder="Mô tả về portfolio này..."
-                  rows={3}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="isDefault" className="select-text cursor-text">
-                  Cài đặt
+                <Label
+                  htmlFor="isDefault"
+                  className="text-sm font-normal select-text cursor-text"
+                >
+                  Đặt làm portfolio mặc định
                 </Label>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="isDefault"
-                    checked={newPortfolio.isDefault}
-                    onCheckedChange={(checked) =>
-                      setNewPortfolio({
-                        ...newPortfolio,
-                        isDefault: checked === true,
-                      })
-                    }
-                  />
-                  <Label
-                    htmlFor="isDefault"
-                    className="text-sm font-normal select-text cursor-text"
-                  >
-                    Đặt làm portfolio mặc định
-                  </Label>
-                </div>
               </div>
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowCreateForm(false)}
-              >
-                Hủy
-              </Button>
-              <Button type="submit">Tạo</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </form>
+      </SimpleDialog>
 
       {/* Add Stock Modal */}
-      <Dialog open={showAddStockForm} onOpenChange={setShowAddStockForm}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Thêm cổ phiếu</DialogTitle>
-            <DialogDescription>
-              Thêm một mã cổ phiếu mới vào portfolio của bạn.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={addStockToPortfolio}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="symbol" className="select-text cursor-text">
-                  Mã cổ phiếu
-                </Label>
-                <Input
-                  id="symbol"
-                  value={newStock.symbol}
-                  onChange={(e) =>
-                    setNewStock({
-                      ...newStock,
-                      symbol: e.target.value.toUpperCase(),
-                    })
-                  }
-                  placeholder="VD: VNM, VCB, HPG..."
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="quantity" className="select-text cursor-text">
-                  Số lượng
-                </Label>
-                <NumberInput
-                  id="quantity"
-                  value={newStock.quantity}
-                  onChange={(value) => {
-                    setNewStock({
-                      ...newStock,
-                      quantity: value,
-                    });
-                  }}
-                  placeholder="Nhập số lượng cổ phiếu..."
-                  formatWithCommas={true}
-                  allowFloat={false}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="avgPrice" className="select-text cursor-text">
-                  Giá trung bình (VND)
-                </Label>
-                <NumberInput
-                  id="avgPrice"
-                  value={newStock.avgPrice}
-                  onChange={(value) => {
-                    setNewStock({
-                      ...newStock,
-                      avgPrice: value,
-                    });
-                  }}
-                  placeholder="Nhập giá trung bình..."
-                  formatWithCommas={true}
-                  allowFloat={true}
-                  required
-                />
-              </div>
+      <SimpleDialog
+        open={showAddStockForm}
+        onClose={() => setShowAddStockForm(false)}
+        title="Thêm cổ phiếu"
+        description="Thêm một mã cổ phiếu mới vào portfolio của bạn."
+        maxWidth="sm"
+        actions={
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowAddStockForm(false)}
+            >
+              Hủy
+            </Button>
+            <Button type="submit" form="add-stock-form" variant="default">
+              Thêm
+            </Button>
+          </div>
+        }
+      >
+        <form id="add-stock-form" onSubmit={addStockToPortfolio}>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="symbol" className="select-text cursor-text">
+                Mã cổ phiếu
+              </Label>
+              <MUIStockSelector
+                value={newStock.symbol}
+                onValueChange={(value: string | string[]) =>
+                  setNewStock({
+                    ...newStock,
+                    symbol: Array.isArray(value) ? value[0] || "" : value,
+                  })
+                }
+                placeholder="VD: VNM, VCB, HPG..."
+                multiple={false}
+              />
             </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowAddStockForm(false)}
-              >
-                Hủy
-              </Button>
-              <Button type="submit" variant="default">
-                Thêm
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+
+            <div className="space-y-2">
+              <Label htmlFor="quantity" className="select-text cursor-text">
+                Số lượng
+              </Label>
+              <NumberInput
+                id="quantity"
+                value={newStock.quantity}
+                onChange={(value) => {
+                  setNewStock({
+                    ...newStock,
+                    quantity: value,
+                  });
+                }}
+                placeholder="Nhập số lượng cổ phiếu..."
+                formatWithCommas={true}
+                allowFloat={false}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="avgPrice" className="select-text cursor-text">
+                Giá trung bình (VND)
+              </Label>
+              <NumberInput
+                id="avgPrice"
+                value={newStock.avgPrice}
+                onChange={(value) => {
+                  setNewStock({
+                    ...newStock,
+                    avgPrice: value,
+                  });
+                }}
+                placeholder="Nhập giá trung bình..."
+                formatWithCommas={true}
+                allowFloat={true}
+                required
+              />
+            </div>
+          </div>
+        </form>
+      </SimpleDialog>
     </div>
   );
 }
