@@ -1,14 +1,16 @@
-from fastapi import APIRouter, HTTPException, BackgroundTasks
-from typing import List
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Query
+from typing import List, Optional
 import logging
 import asyncio
 from datetime import datetime
 
 from ..models import (
-    StockPrice, StockInfo, StockHistory, SyncRequest, SyncResponse, MarketIndex
+    StockPrice, StockInfo, StockHistory, SyncRequest, SyncResponse, MarketIndex,
+    NewsArticle, NewsCategory, NewsFilter, NewsResponse
 )
 from ..services.vnstock_service import vnstock_service
 from ..services.database import db_service
+from ..services.news_service import news_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -208,3 +210,84 @@ async def sync_stocks_task(symbols: List[str], period: str = "1Y"):
             failed_symbols.append(symbol)
     
     logger.info(f"Sync completed. Success: {len(synced_symbols)}, Failed: {len(failed_symbols)}")
+
+# News API Endpoints
+@router.get("/news", response_model=NewsResponse)
+async def get_news(
+    category: Optional[str] = Query(None, description="Filter by category"),
+    symbols: Optional[str] = Query(None, description="Filter by symbols (comma-separated)"),
+    sentiment: Optional[str] = Query(None, description="Filter by sentiment"),
+    limit: int = Query(20, description="Number of articles to return"),
+    page: int = Query(1, description="Page number")
+):
+    """Get news articles with optional filtering"""
+    try:
+        # Parse symbols if provided
+        symbol_list = None
+        if symbols:
+            symbol_list = [s.strip().upper() for s in symbols.split(',')]
+        
+        # Create filter object
+        filters = NewsFilter(
+            category=category,
+            symbols=symbol_list,
+            sentiment=sentiment,
+            limit=limit,
+            page=page
+        )
+        
+        news_response = news_service.get_all_news(filters)
+        return news_response
+        
+    except Exception as e:
+        logger.error(f"Error getting news: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/news/categories", response_model=List[NewsCategory])
+async def get_news_categories():
+    """Get available news categories"""
+    try:
+        return news_service.get_categories()
+    except Exception as e:
+        logger.error(f"Error getting news categories: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/news/stocks/{symbol}", response_model=List[NewsArticle])
+async def get_news_by_symbol(symbol: str, limit: int = Query(10, description="Number of articles")):
+    """Get news articles related to a specific stock symbol"""
+    try:
+        articles = news_service.get_news_by_symbol(symbol.upper(), limit)
+        return articles
+    except Exception as e:
+        logger.error(f"Error getting news for symbol {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/news/cafef", response_model=List[NewsArticle])
+async def get_cafef_news(limit: int = Query(20, description="Number of articles")):
+    """Get news from CafeF RSS feed"""
+    try:
+        articles = news_service.get_news_from_cafef(limit)
+        return articles
+    except Exception as e:
+        logger.error(f"Error getting CafeF news: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/news/vnexpress", response_model=List[NewsArticle])
+async def get_vnexpress_news(limit: int = Query(20, description="Number of articles")):
+    """Get news from VnExpress RSS feed"""
+    try:
+        articles = news_service.get_news_from_vnexpress(limit)
+        return articles
+    except Exception as e:
+        logger.error(f"Error getting VnExpress news: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/news/vnstock", response_model=List[NewsArticle])
+async def get_vnstock_news(symbol: Optional[str] = Query(None, description="Optional symbol filter")):
+    """Get news from VNStock API"""
+    try:
+        articles = news_service.get_stock_news_from_vnstock(symbol)
+        return articles
+    except Exception as e:
+        logger.error(f"Error getting VNStock news: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

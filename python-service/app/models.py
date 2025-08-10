@@ -58,3 +58,37 @@ class MarketIndex(BaseModel):
     change_percent: float
     volume: int
     trading_date: str
+
+# News Models
+class NewsArticle(BaseModel):
+    id: str
+    title: str
+    summary: str
+    content: Optional[str] = None
+    url: str
+    source: str
+    publish_date: datetime
+    category: Optional[str] = None
+    related_symbols: List[str] = []
+    sentiment: Optional[str] = None  # 'positive', 'negative', 'neutral'
+    impact_score: Optional[float] = None  # 0-100 scale
+    tags: List[str] = []
+
+class NewsCategory(BaseModel):
+    id: str
+    name: str
+    description: str
+
+class NewsFilter(BaseModel):
+    category: Optional[str] = None
+    symbols: Optional[List[str]] = None
+    sentiment: Optional[str] = None
+    from_date: Optional[datetime] = None
+    to_date: Optional[datetime] = None
+    limit: int = 20
+
+class NewsResponse(BaseModel):
+    articles: List[NewsArticle]
+    total: int
+    page: int
+    per_page: int

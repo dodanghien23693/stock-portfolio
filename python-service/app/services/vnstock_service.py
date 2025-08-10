@@ -3,6 +3,8 @@ import pandas as pd
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 import logging
+import requests
+import feedparser
 from ..models import StockPrice, StockInfo, StockHistory, StockHistoryData, MarketIndex
 
 logger = logging.getLogger(__name__)
