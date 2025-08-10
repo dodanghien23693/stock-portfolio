@@ -22,6 +22,9 @@ export function NewsCard({
   const categoryName = newsApiService.getCategoryName(article.category);
   const impactColor = newsApiService.getImpactScoreColor(article.impact_score);
   const timeAgo = newsApiService.formatPublishDate(article.publish_date);
+  
+  // Clean summary to remove HTML tags
+  const cleanSummary = newsApiService.extractCleanSummary(article.summary, 200);
 
   const handleSymbolClick = (symbol: string) => {
     if (onSymbolClick) {
@@ -78,7 +81,7 @@ export function NewsCard({
 
       <CardContent className="pt-0">
         <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
-          {article.summary}
+          {cleanSummary}
         </p>
 
         {showFullContent && article.content && (

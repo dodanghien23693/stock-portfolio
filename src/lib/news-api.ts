@@ -64,11 +64,11 @@ class NewsApiService {
               "Thị trường chứng khoán Việt Nam có phiên giao dịch tích cực với VN-Index tăng 1.2% lên 1,270 điểm. Nhóm cổ phiếu ngân hàng và thép dẫn dắt thị trường.",
             url: "https://example.com/news/1",
             source: "CafeF",
-            publishDate: new Date(),
+            publish_date: new Date(),
             category: "market",
             relatedSymbols: ["VCB", "CTG", "HPG", "HSG"],
             sentiment: "positive" as const,
-            impactScore: 75,
+            impact_score: 75,
             tags: ["thị trường", "vn-index", "ngân hàng", "thép"],
           },
           {
@@ -78,11 +78,11 @@ class NewsApiService {
               "Ngân hàng Thương mại Cổ phần Ngoại thương Việt Nam (VCB) báo cáo lợi nhuận trước thuế đạt 7,800 tỷ đồng trong quý 3, tăng 15% so với cùng kỳ năm trước.",
             url: "https://example.com/news/2",
             source: "VNStock",
-            publishDate: new Date(Date.now() - 3600000), // 1 hour ago
+            publish_date: new Date(Date.now() - 3600000), // 1 hour ago
             category: "stocks",
             relatedSymbols: ["VCB"],
             sentiment: "positive" as const,
-            impactScore: 85,
+            impact_score: 85,
             tags: ["vcb", "ngân hàng", "kết quả kinh doanh", "lợi nhuận"],
           },
           {
@@ -93,11 +93,11 @@ class NewsApiService {
               "Giá dầu thô Brent tăng 3% trong phiên giao dịch đêm qua, dự kiến sẽ có tác động tích cực đến các cổ phiếu dầu khí Việt Nam như PVD, PVS, PVC.",
             url: "https://example.com/news/3",
             source: "CafeF",
-            publishDate: new Date(Date.now() - 7200000), // 2 hours ago
+            publish_date: new Date(Date.now() - 7200000), // 2 hours ago
             category: "international",
             relatedSymbols: ["PVD", "PVS", "PVC"],
             sentiment: "positive" as const,
-            impactScore: 65,
+            impact_score: 65,
             tags: ["dầu khí", "giá dầu", "quốc tế"],
           },
           {
@@ -107,11 +107,11 @@ class NewsApiService {
               "Ngân hàng Nhà nước Việt Nam vừa quyết định tăng lãi suất tái cấp vốn lên 4.5%, tăng 0.25% so với mức trước đó. Động thái này nhằm kiểm soát lạm phát.",
             url: "https://example.com/news/4",
             source: "VNStock",
-            publishDate: new Date(Date.now() - 10800000), // 3 hours ago
+            publish_date: new Date(Date.now() - 10800000), // 3 hours ago
             category: "economy",
             relatedSymbols: ["VCB", "CTG", "BID", "TCB"],
             sentiment: "negative" as const,
-            impactScore: 70,
+            impact_score: 70,
             tags: ["lãi suất", "nhnn", "ngân hàng", "chính sách tiền tệ"],
           },
           {
@@ -121,15 +121,29 @@ class NewsApiService {
               "Các cổ phiếu bất động sản như VHM, VIC, NVL đều tăng mạnh trong phiên sáng nay sau thông tin về gói hỗ trợ tín dụng mới từ chính phủ.",
             url: "https://example.com/news/5",
             source: "CafeF",
-            publishDate: new Date(Date.now() - 14400000), // 4 hours ago
+            publish_date: new Date(Date.now() - 14400000), // 4 hours ago
             category: "stocks",
             relatedSymbols: ["VHM", "VIC", "NVL", "DXG"],
             sentiment: "positive" as const,
-            impactScore: 80,
+            impact_score: 80,
             tags: ["bất động sản", "phục hồi", "tín dụng"],
           },
+          {
+            id: "6",
+            title: "Doanh nghiệp đóng góp lớn cho ngân sách nhà nước",
+            summary:
+              '<a href="https://cafef.vn/7-thang-nop-ngan-sach-nha-nuoc-83013-ty-dong-doanh-nghiep-nay-kinh-doanh-gi-ma-du-vay-188250809232249417.chn"><img src="https://cafefcdn.com/zoom/600_315/203337114487263232/2025/8/9/avatar1754756467338-1754756467891600303028.jpg" /></a> Đây là doanh nghiệp đóng vai trò trụ cột trong nền kinh tế quốc dân.',
+            url: "https://example.com/news/6",
+            source: "CafeF",
+            publish_date: new Date(Date.now() - 18000000), // 5 hours ago
+            category: "corporate",
+            relatedSymbols: ["VCB", "HPG"],
+            sentiment: "positive" as const,
+            impact_score: 70,
+            tags: ["doanh nghiệp", "ngân sách", "đóng góp"],
+          },
         ],
-        total: 5,
+        total: 6,
         page: 1,
         perPage: 20,
       };
@@ -194,11 +208,11 @@ class NewsApiService {
           summary: `Công ty ${symbol} vừa công bố kết quả kinh doanh quý 3 với doanh thu và lợi nhuận đều tăng trưởng mạnh so với cùng kỳ năm trước.`,
           url: "https://example.com/news/1",
           source: "VNStock",
-          publishDate: new Date(),
+          publish_date: new Date(),
           category: "stocks",
           relatedSymbols: [symbol],
           sentiment: "positive" as const,
-          impactScore: 85,
+          impact_score: 85,
           tags: [symbol.toLowerCase(), "kết quả kinh doanh"],
         },
       ];
@@ -223,11 +237,11 @@ class NewsApiService {
             "Sau phiên tăng mạnh hôm qua, VN-Index tiếp tục đà tăng và đang test ngưỡng kháng cự quan trọng 1,280 điểm. Thanh khoản thị trường cải thiện đáng kể.",
           url: "https://cafef.vn/news-1",
           source: "CafeF",
-          publishDate: new Date(Date.now() - 1800000),
+          publish_date: new Date(Date.now() - 1800000),
           category: "market",
           relatedSymbols: ["VCB", "HPG", "VNM"],
           sentiment: "positive" as const,
-          impactScore: 70,
+          impact_score: 70,
           tags: ["cafef", "vn-index", "kháng cự"],
         },
         {
@@ -237,11 +251,11 @@ class NewsApiService {
             "Các cổ phiếu công nghệ như FPT, CMG, ELC đều tăng mạnh trong phiên sáng nay khi dòng tiền đầu tư đổ mạnh vào nhóm này.",
           url: "https://cafef.vn/news-2",
           source: "CafeF",
-          publishDate: new Date(Date.now() - 5400000),
+          publish_date: new Date(Date.now() - 5400000),
           category: "stocks",
           relatedSymbols: ["FPT", "CMG", "ELC"],
           sentiment: "positive" as const,
-          impactScore: 65,
+          impact_score: 65,
           tags: ["cafef", "công nghệ", "dòng tiền"],
         },
       ];
@@ -269,11 +283,11 @@ class NewsApiService {
             : "Thị trường chứng khoán Việt Nam tuần qua có những diễn biến tích cực với thanh khoản cải thiện và xu hướng tăng được duy trì.",
           url: "https://vnstock.vn/analysis-1",
           source: "VNStock",
-          publishDate: new Date(Date.now() - 3600000),
+          publish_date: new Date(Date.now() - 3600000),
           category: symbol ? "analysis" : "market",
           relatedSymbols: symbol ? [symbol] : ["VCB", "VNM", "HPG"],
           sentiment: "positive" as const,
-          impactScore: 75,
+          impact_score: 75,
           tags: symbol
             ? ["vnstock", symbol.toLowerCase(), "phân tích"]
             : ["vnstock", "báo cáo", "thị trường"],
@@ -297,11 +311,11 @@ class NewsApiService {
             "Thủ tướng Chính phủ vừa ban hành chỉ thị khuyến khích các định chế tài chính tăng cường đầu tư vào thị trường chứng khoán để hỗ trợ nền kinh tế.",
           url: "https://vnexpress.net/kinh-doanh/news-1",
           source: "VnExpress",
-          publishDate: new Date(Date.now() - 2700000),
+          publish_date: new Date(Date.now() - 2700000),
           category: "economy",
           relatedSymbols: ["VCB", "VNM", "HPG"],
           sentiment: "positive" as const,
-          impactScore: 80,
+          impact_score: 80,
           tags: ["vnexpress", "chính phủ", "đầu tư"],
         },
         {
@@ -311,11 +325,11 @@ class NewsApiService {
             "Các ngân hàng thương mại tiếp tục điều chỉnh giảm lãi suất cho vay để kích thích nhu cầu tín dụng và hỗ trợ doanh nghiệp phục hồi sau dịch.",
           url: "https://vnexpress.net/kinh-doanh/news-2",
           source: "VnExpress",
-          publishDate: new Date(Date.now() - 7200000),
+          publish_date: new Date(Date.now() - 7200000),
           category: "economy",
           relatedSymbols: ["VCB", "CTG", "BID"],
           sentiment: "positive" as const,
-          impactScore: 70,
+          impact_score: 70,
           tags: ["vnexpress", "lãi suất", "ngân hàng"],
         },
       ];
@@ -461,6 +475,39 @@ class NewsApiService {
     }
   }
 
+  // Clean HTML content to plain text
+  cleanHtmlContent(html: string): string {
+    if (!html) return "";
+    
+    // Remove HTML tags using regex
+    let cleanText = html
+      .replace(/<[^>]*>/g, '') // Remove all HTML tags
+      .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+      .replace(/&amp;/g, '&') // Replace &amp; with &
+      .replace(/&lt;/g, '<') // Replace &lt; with <
+      .replace(/&gt;/g, '>') // Replace &gt; with >
+      .replace(/&quot;/g, '"') // Replace &quot; with "
+      .replace(/&#39;/g, "'") // Replace &#39; with '
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .trim(); // Remove leading/trailing spaces
+    
+    return cleanText;
+  }
+
+  // Extract clean summary from potentially HTML content
+  extractCleanSummary(summary: string, maxLength: number = 200): string {
+    if (!summary) return "";
+    
+    const cleanText = this.cleanHtmlContent(summary);
+    
+    // Truncate if too long
+    if (cleanText.length > maxLength) {
+      return cleanText.substring(0, maxLength).trim() + "...";
+    }
+    
+    return cleanText;
+  }
+
   // Generate news statistics
   generateNewsStats(articles: NewsArticle[]): NewsStats {
     const totalArticles = articles.length;
@@ -485,7 +532,7 @@ class NewsApiService {
             symbolCounts[symbol] = { count: 0, totalImpact: 0 };
           }
           symbolCounts[symbol].count++;
-          symbolCounts[symbol].totalImpact += article.impactScore || 0;
+          symbolCounts[symbol].totalImpact += article.impact_score || 0;
         });
       }
     });
