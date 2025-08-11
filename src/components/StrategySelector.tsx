@@ -1,11 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -31,17 +43,24 @@ interface StrategySelection {
 }
 
 interface StrategySelectProps {
-  onStrategySelect: (selection: StrategySelection | StrategySelection[]) => void;
-  mode: 'single' | 'multi';
+  onStrategySelect: (
+    selection: StrategySelection | StrategySelection[]
+  ) => void;
+  mode: "single" | "multi";
   selectedStrategies?: StrategySelection[];
 }
 
-export function StrategySelector({ onStrategySelect, mode = 'single', selectedStrategies = [] }: StrategySelectProps) {
+export function StrategySelector({
+  onStrategySelect,
+  mode = "single",
+  selectedStrategies = [],
+}: StrategySelectProps) {
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [categories, setCategories] = useState<StrategyCategories>({});
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [currentSelection, setCurrentSelection] = useState<StrategySelection[]>(selectedStrategies);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [currentSelection, setCurrentSelection] =
+    useState<StrategySelection[]>(selectedStrategies);
   const [showParameters, setShowParameters] = useState<string | null>(null);
   const router = useRouter();
 
@@ -51,70 +70,113 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
 
   const fetchStrategies = async () => {
     try {
-      const response = await fetch('/api/strategies');
+      const response = await fetch("/api/strategies");
       const data = await response.json();
       setStrategies(data.strategies);
       setCategories(data.categories);
     } catch (error) {
-      console.error('Error fetching strategies:', error);
+      console.error("Error fetching strategies:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredStrategies = selectedCategory === 'all' 
-    ? strategies 
-    : strategies.filter(s => s.category === selectedCategory);
+  const filteredStrategies =
+    selectedCategory === "all"
+      ? strategies
+      : strategies.filter((s) => s.category === selectedCategory);
 
   const handleStrategyToggle = (strategy: Strategy) => {
-    if (mode === 'single') {
+    if (mode === "single") {
       const selection: StrategySelection = {
         strategyKey: strategy.key,
-        parameters: strategy.parameters
+        parameters: strategy.parameters,
       };
       setCurrentSelection([selection]);
       onStrategySelect(selection);
     } else {
-      const existing = currentSelection.find(s => s.strategyKey === strategy.key);
+      const existing = currentSelection.find(
+        (s) => s.strategyKey === strategy.key
+      );
       let newSelection: StrategySelection[];
-      
+
       if (existing) {
-        newSelection = currentSelection.filter(s => s.strategyKey !== strategy.key);
+        newSelection = currentSelection.filter(
+          (s) => s.strategyKey !== strategy.key
+        );
       } else {
-        const allocation = currentSelection.length === 0 ? 100 : 
-          Math.max(0, 100 - currentSelection.reduce((sum, s) => sum + (s.allocation || 0), 0));
-        
-        newSelection = [...currentSelection, {
-          strategyKey: strategy.key,
-          parameters: strategy.parameters,
-          allocation: Math.min(allocation, 25) // Default to 25% or remaining
-        }];
+        const allocation =
+          currentSelection.length === 0
+            ? 100
+            : Math.max(
+                0,
+                100 -
+                  currentSelection.reduce(
+                    (sum, s) => sum + (s.allocation || 0),
+                    0
+                  )
+              );
+
+        newSelection = [
+          ...currentSelection,
+          {
+            strategyKey: strategy.key,
+            parameters: strategy.parameters,
+            allocation: Math.min(allocation, 25), // Default to 25% or remaining
+          },
+        ];
       }
-      
+
       setCurrentSelection(newSelection);
       onStrategySelect(newSelection);
     }
   };
 
-  const handleParameterChange = (strategyKey: string, paramKey: string, value: any) => {
-    const newSelection = currentSelection.map(s => 
-      s.strategyKey === strategyKey 
+  const handleParameterChange = (
+    strategyKey: string,
+    paramKey: string,
+    value: any
+  ) => {
+    const newSelection = currentSelection.map((s) =>
+      s.strategyKey === strategyKey
         ? { ...s, parameters: { ...s.parameters, [paramKey]: value } }
         : s
     );
     setCurrentSelection(newSelection);
-    onStrategySelect(mode === 'single' ? newSelection[0] : newSelection);
+    onStrategySelect(mode === "single" ? newSelection[0] : newSelection);
   };
 
   const handleAllocationChange = (strategyKey: string, allocation: number) => {
-    const newSelection = currentSelection.map(s => 
-      s.strategyKey === strategyKey ? { ...s, allocation } : s
+    // Calculate the current total allocation excluding the strategy being changed
+    const otherAllocations = currentSelection
+      .filter(s => s.strategyKey !== strategyKey)
+      .reduce((sum, s) => sum + (s.allocation || 0), 0);
+    
+    // Calculate the maximum allowed allocation for this strategy
+    const maxAllowed = 100 - otherAllocations;
+    
+    // Ensure the allocation doesn't exceed the maximum allowed and is not negative
+    const validatedAllocation = Math.max(0, Math.min(allocation, maxAllowed));
+    
+    const newSelection = currentSelection.map((s) =>
+      s.strategyKey === strategyKey ? { ...s, allocation: validatedAllocation } : s
     );
     setCurrentSelection(newSelection);
     onStrategySelect(newSelection);
   };
 
-  const totalAllocation = currentSelection.reduce((sum, s) => sum + (s.allocation || 0), 0);
+  // Helper function to calculate max allowed for a specific strategy
+  const getMaxAllowedForStrategy = (strategyKey: string) => {
+    const otherAllocations = currentSelection
+      .filter(s => s.strategyKey !== strategyKey)
+      .reduce((sum, s) => sum + (s.allocation || 0), 0);
+    return Math.max(0, 100 - otherAllocations);
+  };
+
+  const totalAllocation = currentSelection.reduce(
+    (sum, s) => sum + (s.allocation || 0),
+    0
+  );
 
   if (loading) {
     return <div className="flex justify-center p-8">Loading strategies...</div>;
@@ -125,10 +187,14 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">
-            {mode === 'single' ? 'Chọn chiến lược giao dịch' : 'Danh mục đa chiến lược'}
+            {mode === "single"
+              ? "Chọn chiến lược giao dịch"
+              : "Danh mục đa chiến lược"}
           </h3>
-          {mode === 'multi' && (
-            <Badge variant={totalAllocation === 100 ? "default" : "destructive"}>
+          {mode === "multi" && (
+            <Badge
+              variant={totalAllocation === 100 ? "default" : "destructive"}
+            >
               Tổng phân bổ: {totalAllocation.toFixed(1)}%
             </Badge>
           )}
@@ -140,8 +206,10 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả danh mục</SelectItem>
-            {Object.keys(categories).map(category => (
-              <SelectItem key={category} value={category}>{category}</SelectItem>
+            {Object.keys(categories).map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -149,21 +217,27 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredStrategies.map((strategy) => {
-          const isSelected = currentSelection.some(s => s.strategyKey === strategy.key);
-          const selection = currentSelection.find(s => s.strategyKey === strategy.key);
-          
+          const isSelected = currentSelection.some(
+            (s) => s.strategyKey === strategy.key
+          );
+          const selection = currentSelection.find(
+            (s) => s.strategyKey === strategy.key
+          );
+
           return (
-            <Card 
-              key={strategy.key} 
+            <Card
+              key={strategy.key}
               className={`cursor-pointer transition-all hover:shadow-md ${
-                isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''
+                isSelected ? "ring-2 ring-blue-500 bg-blue-50" : ""
               }`}
               onClick={() => handleStrategyToggle(strategy)}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-sm font-medium">{strategy.name}</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      {strategy.name}
+                    </CardTitle>
                     <Badge variant="outline" className="mt-1 text-xs">
                       {strategy.category}
                     </Badge>
@@ -186,7 +260,11 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setShowParameters(showParameters === strategy.key ? null : strategy.key);
+                          setShowParameters(
+                            showParameters === strategy.key
+                              ? null
+                              : strategy.key
+                          );
                         }}
                         title="Cài đặt tham số"
                       >
@@ -200,55 +278,104 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
                 <CardDescription className="text-xs mb-3">
                   {strategy.description}
                 </CardDescription>
-                
-                {mode === 'multi' && isSelected && selection && (
+
+                {mode === "multi" && isSelected && selection && (
                   <div className="space-y-2 mt-3 pt-3 border-t">
-                    <Label className="text-xs">Phân bổ: {selection.allocation?.toFixed(1)}%</Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs">Phân bổ</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={selection.allocation || 0}
+                          onChange={(e) => {
+                            const maxAllowed = getMaxAllowedForStrategy(strategy.key);
+                            const value = Math.max(0, Math.min(maxAllowed, Number(e.target.value) || 0));
+                            handleAllocationChange(strategy.key, value);
+                          }}
+                          min={0}
+                          max={getMaxAllowedForStrategy(strategy.key)}
+                          className="h-6 w-16 text-xs text-center"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span className="text-xs text-gray-500">%</span>
+                      </div>
+                    </div>
                     <Slider
                       value={[selection.allocation || 0]}
-                      onValueChange={([value]: number[]) => handleAllocationChange(strategy.key, value)}
-                      max={100}
+                      onValueChange={([value]: number[]) =>
+                        handleAllocationChange(strategy.key, value)
+                      }
+                      max={Math.max(1, getMaxAllowedForStrategy(strategy.key))} // Ensure max is at least 1 to prevent slider issues
                       step={1}
-                      className="w-full"
+                      className="w-full [&>span:first-child]:h-2 [&>span:first-child]:bg-gray-200 [&>span:first-child]:border [&>span:first-child]:border-gray-300 [&_[role=slider]]:border-2 [&_[role=slider]]:border-blue-500 [&_[role=slider]]:bg-white [&_[role=slider]]:shadow-sm"
                       onClick={(e: any) => e.stopPropagation()}
                     />
+                    {(() => {
+                      // Show remaining allocation info
+                      const remaining = 100 - totalAllocation;
+                      
+                      if (remaining < 0) {
+                        return (
+                          <p className="text-xs text-red-500">
+                            Vượt quá giới hạn {Math.abs(remaining).toFixed(1)}%
+                          </p>
+                        );
+                      } else if (remaining > 0) {
+                        return (
+                          <p className="text-xs text-gray-500">
+                            Còn lại: {remaining.toFixed(1)}%
+                          </p>
+                        );
+                      } else {
+                        return (
+                          <p className="text-xs text-green-600">
+                            Đã phân bổ đủ 100%
+                          </p>
+                        );
+                      }
+                    })()}
                   </div>
                 )}
 
                 {showParameters === strategy.key && isSelected && (
-                  <div className="mt-3 pt-3 border-t space-y-3" onClick={(e) => e.stopPropagation()}>
+                  <div
+                    className="mt-3 pt-3 border-t space-y-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Label className="text-xs font-medium">Tham số</Label>
                     {Object.entries(strategy.parameters).map(([key, value]) => (
                       <div key={key} className="space-y-1">
                         <Label className="text-xs text-gray-600">{key}</Label>
-                        {typeof value === 'number' ? (
+                        {typeof value === "number" ? (
                           <Input
                             type="number"
                             value={selection?.parameters[key] || value}
-                            onChange={(e) => handleParameterChange(
-                              strategy.key, 
-                              key, 
-                              Number(e.target.value)
-                            )}
+                            onChange={(e) =>
+                              handleParameterChange(
+                                strategy.key,
+                                key,
+                                Number(e.target.value)
+                              )
+                            }
                             className="h-7 text-xs"
                           />
-                        ) : typeof value === 'boolean' ? (
+                        ) : typeof value === "boolean" ? (
                           <Switch
                             checked={selection?.parameters[key] ?? value}
-                            onCheckedChange={(checked: boolean) => handleParameterChange(
-                              strategy.key, 
-                              key, 
-                              checked
-                            )}
+                            onCheckedChange={(checked: boolean) =>
+                              handleParameterChange(strategy.key, key, checked)
+                            }
                           />
                         ) : (
                           <Input
                             value={selection?.parameters[key] || value}
-                            onChange={(e) => handleParameterChange(
-                              strategy.key, 
-                              key, 
-                              e.target.value
-                            )}
+                            onChange={(e) =>
+                              handleParameterChange(
+                                strategy.key,
+                                key,
+                                e.target.value
+                              )
+                            }
                             className="h-7 text-xs"
                           />
                         )}
@@ -262,7 +389,7 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
         })}
       </div>
 
-      {mode === 'multi' && currentSelection.length > 0 && (
+      {mode === "multi" && currentSelection.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Chiến lược đã chọn</CardTitle>
@@ -270,11 +397,18 @@ export function StrategySelector({ onStrategySelect, mode = 'single', selectedSt
           <CardContent>
             <div className="space-y-2">
               {currentSelection.map((selection) => {
-                const strategy = strategies.find(s => s.key === selection.strategyKey);
+                const strategy = strategies.find(
+                  (s) => s.key === selection.strategyKey
+                );
                 return (
-                  <div key={selection.strategyKey} className="flex items-center justify-between py-1">
+                  <div
+                    key={selection.strategyKey}
+                    className="flex items-center justify-between py-1"
+                  >
                     <span className="text-sm">{strategy?.name}</span>
-                    <Badge variant="outline">{selection.allocation?.toFixed(1)}%</Badge>
+                    <Badge variant="outline">
+                      {selection.allocation?.toFixed(1)}%
+                    </Badge>
                   </div>
                 );
               })}

@@ -17,7 +17,17 @@ import {
   BarChart3Icon,
   CalendarIcon,
   ActivityIcon,
+  TrashIcon,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button as MuiButton,
+} from "@mui/material";
+import { useToast } from "@/hooks/use-toast";
 
 interface BacktestResult {
   id: string;
@@ -71,6 +81,10 @@ export function ResultsDashboard() {
   const [selectedResult, setSelectedResult] = useState<BacktestResult | null>(
     null
   );
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [backtestToDelete, setBacktestToDelete] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchBacktests();
@@ -89,6 +103,57 @@ export function ResultsDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const deleteBacktest = async (id: string) => {
+    setBacktestToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!backtestToDelete) return;
+
+    setDeleting(backtestToDelete);
+    setDeleteDialogOpen(false);
+    
+    try {
+      const response = await fetch(`/api/backtests/${backtestToDelete}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete backtest");
+      }
+
+      // Remove the deleted backtest from the list
+      setBacktests(prev => prev.filter(backtest => backtest.id !== backtestToDelete));
+      
+      // Clear selected result if it was the deleted one
+      if (selectedResult?.id === backtestToDelete) {
+        setSelectedResult(null);
+      }
+
+      toast({
+        title: "Thành công",
+        description: "Backtest đã được xóa thành công.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error deleting backtest:", error);
+      toast({
+        title: "Có lỗi xảy ra",
+        description: "Không thể xóa backtest. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleting(null);
+      setBacktestToDelete(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setBacktestToDelete(null);
   };
 
   const formatCurrency = (amount: number) => {
@@ -212,15 +277,17 @@ export function ResultsDashboard() {
               backtests.map((backtest) => (
                 <div
                   key={backtest.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                  className={`p-4 border rounded-lg transition-all hover:shadow-md ${
                     selectedResult?.id === backtest.id
                       ? "ring-2 ring-blue-500 bg-blue-50"
                       : ""
                   }`}
-                  onClick={() => setSelectedResult(backtest)}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                    <div 
+                      className="flex-1 cursor-pointer"
+                      onClick={() => setSelectedResult(backtest)}
+                    >
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-medium">{backtest.name}</h3>
                         {getStatusBadge(backtest.status)}
@@ -247,25 +314,44 @@ export function ResultsDashboard() {
                       </div>
                     </div>
 
-                    {backtest.status === "completed" && (
-                      <div className="text-right">
-                        <div
-                          className={`text-lg font-bold ${getReturnColor(
-                            backtest.totalReturn
-                          )}`}
-                        >
-                          {formatPercent(backtest.totalReturn || 0)}
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          {formatCurrency(backtest.finalCash || 0)}
-                        </div>
-                        {backtest.winRate && (
-                          <div className="text-xs text-gray-500">
-                            Win Rate: {(backtest.winRate * 100).toFixed(1)}%
+                    <div className="flex items-center gap-3">
+                      {backtest.status === "completed" && (
+                        <div className="text-right">
+                          <div
+                            className={`text-lg font-bold ${getReturnColor(
+                              backtest.totalReturn
+                            )}`}
+                          >
+                            {formatPercent(backtest.totalReturn || 0)}
                           </div>
+                          <div className="text-sm text-gray-600">
+                            {formatCurrency(backtest.finalCash || 0)}
+                          </div>
+                          {backtest.winRate && (
+                            <div className="text-xs text-gray-500">
+                              Win Rate: {(backtest.winRate * 100).toFixed(1)}%
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteBacktest(backtest.id);
+                        }}
+                        disabled={deleting === backtest.id}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        {deleting === backtest.id ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+                        ) : (
+                          <TrashIcon className="h-4 w-4" />
                         )}
-                      </div>
-                    )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -430,6 +516,24 @@ export function ResultsDashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onClose={handleCancelDelete}>
+        <DialogTitle>Xác nhận xóa</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Bạn có chắc chắn muốn xóa backtest này không? Hành động này không thể hoàn tác.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <MuiButton onClick={handleCancelDelete} color="primary">
+            Hủy
+          </MuiButton>
+          <MuiButton onClick={handleConfirmDelete} color="error" variant="contained">
+            Xóa
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
