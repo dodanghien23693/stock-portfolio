@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StrategySelector } from "./StrategySelector";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
   PlayCircleIcon,
@@ -22,6 +23,7 @@ import {
   TrendingUpIcon,
   TrendingDownIcon,
   DollarSignIcon,
+  TrashIcon,
 } from "lucide-react";
 
 interface PaperTradingPosition {
@@ -66,6 +68,12 @@ export function PaperTrading() {
   });
   const [selectedStrategy, setSelectedStrategy] =
     useState<StrategySelection | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -169,7 +177,20 @@ export function PaperTrading() {
     action: "pause" | "resume" | "stop"
   ) => {
     try {
-      // TODO: Implement strategy control API
+      const response = await fetch(
+        `/api/paper-trading/strategies/${strategyId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        }
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || `Failed to ${action} strategy`);
+      }
+
       toast({
         title: `Strategy ${action}d`,
         description: `Strategy ${strategyId} has been ${action}d`,
@@ -177,6 +198,53 @@ export function PaperTrading() {
       fetchPaperTradingData();
     } catch (error) {
       console.error(`Error ${action}ing strategy:`, error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteStrategy = async (strategyId: string, strategyName: string) => {
+    setConfirmDialog({
+      open: true,
+      title: "Delete Strategy",
+      message: `Are you sure you want to delete the strategy "${strategyName}"? This action cannot be undone and will close all open positions.`,
+      onConfirm: () => performDeleteStrategy(strategyId, strategyName),
+    });
+  };
+
+  const performDeleteStrategy = async (
+    strategyId: string,
+    strategyName: string
+  ) => {
+    try {
+      const response = await fetch(
+        `/api/paper-trading/strategies/${strategyId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Failed to delete strategy");
+      }
+
+      toast({
+        title: "Strategy Deleted",
+        description: `Strategy "${strategyName}" has been deleted`,
+      });
+
+      fetchPaperTradingData();
+    } catch (error) {
+      console.error("Error deleting strategy:", error);
+      toast({
+        title: "Failed to Delete",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
     }
   };
 
@@ -393,6 +461,16 @@ export function PaperTrading() {
                       >
                         <StopCircleIcon className="h-4 w-4" />
                       </Button>
+
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() =>
+                          deleteStrategy(strategy.id, strategy.name)
+                        }
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))
@@ -457,6 +535,18 @@ export function PaperTrading() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onClose={() => setConfirmDialog((prev) => ({ ...prev, open: false }))}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        message={confirmDialog.message}
+        confirmText="Delete"
+        cancelText="Cancel"
+        destructive={true}
+      />
     </div>
   );
 }

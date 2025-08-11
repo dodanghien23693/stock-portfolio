@@ -3,6 +3,36 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+// Types for paper trading
+interface MockStrategy {
+  id: string;
+  name: string;
+  status: "active" | "paused" | "stopped";
+  totalReturn: number;
+  dayChange: number;
+  startDate: string;
+}
+
+// Mock data store (in production this would be in database)
+export let mockActiveStrategies: MockStrategy[] = [
+  {
+    id: "strategy-1",
+    name: "RSI Strategy",
+    status: "active",
+    totalReturn: 2.5,
+    dayChange: 0.8,
+    startDate: new Date().toISOString(),
+  },
+  {
+    id: "strategy-2",
+    name: "SMA Strategy",
+    status: "active",
+    totalReturn: -1.2,
+    dayChange: -0.3,
+    startDate: new Date().toISOString(),
+  },
+];
+
 // GET - Get user's paper trading positions
 export async function GET() {
   try {
@@ -43,22 +73,7 @@ export async function GET() {
           strategy: "SMA Strategy",
         },
       ],
-      activeStrategies: [
-        {
-          id: "strategy-1",
-          name: "RSI Strategy",
-          status: "active",
-          totalReturn: 2.5,
-          dayChange: 0.8,
-        },
-        {
-          id: "strategy-2",
-          name: "SMA Strategy",
-          status: "active",
-          totalReturn: -1.2,
-          dayChange: -0.3,
-        },
-      ],
+      activeStrategies: mockActiveStrategies,
     };
 
     return NextResponse.json(paperTradingData);
@@ -93,19 +108,17 @@ export async function POST(request: Request) {
     // TODO: Implement paper trading strategy start logic
     // For now return success
 
-    const paperTrading = {
-      id: `paper-${Date.now()}`,
+    const paperTrading: MockStrategy = {
+      id: `strategy-${Date.now()}`,
       name: name || `Paper Trading ${strategyKey}`,
-      strategyKey,
-      strategyParams,
-      initialCash,
-      stockSymbols,
       status: "active",
-      startDate: new Date(),
-      currentValue: initialCash,
+      startDate: new Date().toISOString(),
       totalReturn: 0,
-      positions: [],
+      dayChange: 0,
     };
+
+    // Add to mock data
+    mockActiveStrategies.push(paperTrading);
 
     return NextResponse.json(paperTrading);
   } catch (error) {

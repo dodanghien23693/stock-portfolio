@@ -189,7 +189,7 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="name">Backtest Name</Label>
                 <Input
                   id="name"
@@ -199,7 +199,7 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
                 />
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="description">Description (Optional)</Label>
                 <Textarea
                   id="description"
@@ -213,7 +213,7 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <Label
                     htmlFor="startDate"
                     className="flex items-center gap-1"
@@ -231,7 +231,7 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
                   />
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="endDate" className="flex items-center gap-1">
                     <CalendarIcon className="h-3 w-3" />
                     End Date
@@ -250,29 +250,33 @@ export function BacktestForm({ onBacktestComplete }: BacktestFormProps) {
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="initialCash">Initial Capital (VND)</Label>
-                <Input
-                  id="initialCash"
-                  type="number"
-                  value={formData.initialCash}
-                  onChange={(e) =>
-                    handleInputChange("initialCash", Number(e.target.value))
-                  }
-                  placeholder="100000000"
-                />
-                <p className="text-xs text-gray-500 mt-1">
+                <div className="space-y-2">
+                  <Label htmlFor="initialCash">Initial Capital (VND)</Label>
+                  <Input
+                    id="initialCash"
+                    type="number"
+                    value={formData.initialCash}
+                    onChange={(e) =>
+                      handleInputChange("initialCash", Number(e.target.value))
+                    }
+                    placeholder="100000000"
+                  />
+                </div>
+                {/* <p className="text-xs text-gray-500 mt-1">
                   Current: {(formData.initialCash / 1000000).toFixed(0)}M VND
-                </p>
+                </p> */}
               </div>
 
               <div>
-                <Label htmlFor="stockSymbols">Stock Symbols</Label>
-                <Input
-                  id="stockSymbols"
-                  value={formData.stockSymbols.join(", ")}
-                  onChange={(e) => handleStockSymbolsChange(e.target.value)}
-                  placeholder="VCB, VIC, GAS, MSN"
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="stockSymbols">Stock Symbols</Label>
+                  <Input
+                    id="stockSymbols"
+                    value={formData.stockSymbols.join(", ")}
+                    onChange={(e) => handleStockSymbolsChange(e.target.value)}
+                    placeholder="VCB, VIC, GAS, MSN"
+                  />
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
                   Comma-separated list of stock symbols
                 </p>
